@@ -43,7 +43,7 @@ const sendResults = ({eventname, eventdatetime, amount, language,
             smtpTransport.close();
             return error;
         }
-        return undefined;
+        return response;
     })
 }
 
