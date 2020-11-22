@@ -39,8 +39,11 @@ const sendResults = ({eventname, eventdatetime, amount, language,
     };
     
     smtpTransport.sendMail(mailOptions, (error, response) => {
-        error ? console.log(error) : console.log(response);
-        smtpTransport.close();
+        if(error) {
+            smtpTransport.close();
+            return error;
+        }
+        return undefined;
     })
 }
 

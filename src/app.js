@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/api/sendresults', (req, res) => {
     if(!req.body) res.status(404).end();
     const {eventname, eventdatetime, amount, language, participants} = req.body;
-    sendResults({
+    const error = sendResults({
         eventname,
         eventdatetime,
         amount,
@@ -27,6 +27,7 @@ app.post('/api/sendresults', (req, res) => {
         friendsurname: participants[0].friendsurname,
         sendcalendar: false
     })
+    if(error) return res.status(404).send(error);
     res.status(200).send('Mail send successfully');
 })
 
