@@ -1,0 +1,27 @@
+{
+  "eventid": 123,
+  "eventname": "Foo",
+  "organizername": "Pepe Lotas",
+  "organizeremail": "plotas@gmail.com",
+  "eventdatetime": "YYYY-MM-DDThh:mm:ss.sTZD",
+  "amount": {
+    "min": 10,
+    "max": 50
+  },
+  "language": "es",
+  "participants": [{
+    "name": "Participant",
+    "surname": "One",
+    "email": "pone@gmail.com",
+    "phone": "1234567890",
+    "friendname": "Amigo",
+    "friendsurname": "Tres"
+  }, {
+    "name": "Participante",
+    "surname": "Dos",
+    "email": "pdos@gmail.com",
+    "phone": "0987654321",
+    "friendname": "Friend",
+    "friendsurname": "Five"
+  }]
+}
