@@ -12,7 +12,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.post('/secretamigo/sendresults', (req, res) => {
+app.post('/api/sendresults', (req, res) => {
     if(!req.body) res.status(404).end();
     const {eventname, eventdatetime, amount, language, participants} = req.body;
     sendResults({
