@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const { google } = require('googleapis');
+const { response } = require('express');
 const OAuth2 = google.auth.OAuth2;
 
 const oauth2Client = new OAuth2(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, 'https://developers.google.com/oauthplayground');
@@ -26,7 +27,7 @@ const smtpTransport = nodemailer.createTransport({
 });
 
 const sendResults = ({eventname, eventdatetime, amount, language, 
-    toname, tosurname, toemail, friendname, friendsurname, sendcalendar=false, }) => {
+    toname, tosurname, toemail, friendname, friendsurname, sendcalendar=false, }, callback) => {
 
     const mailOptions = {
         from: 'Secret Amigos <secret.amigos.app@gmail.com>',
@@ -37,14 +38,20 @@ const sendResults = ({eventname, eventdatetime, amount, language,
         html: `<b>Secret Amigos</b><p>Hola ${toname}! <br>Tu amigo secreto es: ${friendname} ${friendsurname}</p><p>Cheers!</p>`,
         text: `Secret Amigos. Hola ${toname}!`
     };
-    
+
     smtpTransport.sendMail(mailOptions, (error, response) => {
-        if(error) {
+        error? callback(error, undefined): callback(undefined, response);
             smtpTransport.close();
-            return error;
-        }
-        return response;
+            // return resp;
+        // } else {
+            // resp = response;
+            // console.log(resp);
+            // smtpTransport.close();
+            // return response;
+            // callback(undefined, response);
+        // }
     })
+
 }
 
 module.exports = {

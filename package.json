@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "env-cmd ./config/dev.env node ./src/app.js"
+    "dev": "env-cmd ./config/dev.env nodemon ./src/app.js"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +17,7 @@
     "nodemailer": "^6.4.16"
   },
   "devDependencies": {
-    "env-cmd": "^8.0.2"
+    "env-cmd": "^8.0.2",
+    "nodemon": "^2.0.6"
   }
 }

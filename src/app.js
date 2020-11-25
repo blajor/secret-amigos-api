@@ -14,20 +14,43 @@ app.use(express.urlencoded({ extended: true }));
 
 app.post('/api/sendresults', (req, res) => {
     if(!req.body) res.status(404).end();
+
     const {eventname, eventdatetime, amount, language, participants} = req.body;
-    const sent = sendResults({
-        eventname,
-        eventdatetime,
-        amount,
-        language,
-        toname: participants[0].name,
-        tosurname: participants[0].surname,
-        toemail: participants[0].email,
-        friendname: participants[0].friendname,
-        friendsurname: participants[0].friendsurname,
-        sendcalendar: false
-    })
-    res.status(200).send(sent);
+    const accepted = [];
+    const rejected = [];
+    var counter = 0;
+
+    if(participants.length < 3 || participants.length > 20)
+        return res.status(404).send({error: 'Unable to send < 3 or > 20 participants. Please review and retry.'})
+
+    for(let i = 0; i < participants.length; i++) {
+        sendResults({
+            eventname,
+            eventdatetime,
+            amount,
+            language,
+            toname: participants[i].name,
+            tosurname: participants[i].surname,
+            toemail: participants[i].email,
+            friendname: participants[i].friendname,
+            friendsurname: participants[i].friendsurname,
+            sendcalendar: false
+        }, (error, response) => {
+            counter++;
+            if(error) {
+                if(error.accepted[0]) accepted.push(error.accepted[0]);
+                if(error.rejected[0]) rejected.push(error.rejected[0]);
+            } else {
+                if(response.accepted[0]) accepted.push(response.accepted[0]);
+                if(response.rejected[0]) rejected.push(response.rejected[0]);
+                }
+            if(counter === participants.length)
+                res.status(200).send({
+                    accepted,
+                    rejected
+                });
+        });
+    }
 })
 
 app.listen(port, () => {
