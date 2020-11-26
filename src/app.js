@@ -3,29 +3,32 @@ const fs = require('fs');
 const express = require('express');
 const Handlebars = require('handlebars');
 const {sendResults} = require('../utils/mailer');
-// const path = require('path');
+const { body, validationResult, check } =  require('express-validator');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 const publicDirectoryPath = path.join(__dirname, '../public');
-// const viewsPath = path.join(__dirname, '../templates/views');
-// const partialsPath = path.join(__dirname, '../templates/partials');
 
-// const publicDirectoryPath = path.join(__dirname, '../public');
-
-// app.use(express.static(publicDirectoryPath));
-// app.set('view engine', 'html');
-// app.engine('html', require('hbs').__express);
-// app.set('views', viewsPath);
-// hbs.registerPartials(partialsPath);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// app.use(express.static(publicDirectoryPath));
 
-app.post('/api/sendresults', (req, res) => {
-    if(!req.body) res.status(404).end();
+app.use(express.static(publicDirectoryPath));
+
+app.post('/api/sendresults', [
+    check("eventid", "Event id must be a valid UUID value").isUUID(),
+    check("eventname", "Event Name is a required field").notEmpty(),
+    check("eventdatetime", "Event date time is a required field").notEmpty(),
+    check("language", "Language required field").notEmpty(),
+    check("participants.*.id", "Participant id must be a valid UUID value").isUUID(),
+    check("participants.*.name", "Participant name is a required field").notEmpty(),
+    check("participants.*.email", "Participant email is a required field").notEmpty(),
+    check("participants.*.friendname", "Participant friendname is a required field").notEmpty(),
+], (req, res) => {
+    // if(!req.body) return res.status(404).end();
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const {eventname, eventdatetime, amount, language, participants} = req.body;
     const accepted = [];
