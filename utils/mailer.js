@@ -25,7 +25,14 @@ const smtpTransport = nodemailer.createTransport({
     }
 });
 
-const sendResults = ({eventname, toname, tosurname, toemail, sendcalendar=false, mailbody }, callback) => {
+const sendResults = ({
+    eventname, 
+    toname,
+    tosurname,
+    toemail,
+    sendcalendar=false,
+    mailbody
+}, callback) => {
 
     const mailOptions = {
         from: 'Secret Amigos <secret.amigos.app@gmail.com>',

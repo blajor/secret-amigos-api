@@ -43,7 +43,7 @@ app.post('/api/results', [
     const errors = validationResult(req);
     if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    const {eventname, eventdatetime, amount, language, participants} = req.body;
+    const {eventname, eventdatetime, amount, language, participants, custommessage, eventlocation} = req.body;
     const accepted = [];
     const rejected = [];
     var counter = 0;
@@ -60,7 +60,7 @@ app.post('/api/results', [
         // res.send(req.query.id);
         for(let i = 0; i < participants.length; i++) {
             let {id: toid, name: toname, surname: tosurname, email: toemail, friendname, friendsurname} = participants[i];
-            createMailContent(eventname, eventdatetime, amount, language, toid, toname, tosurname, toemail, friendname, friendsurname, false, (mailContent) => {
+            createMailContent(eventname, eventdatetime, amount, language, custommessage, eventlocation, toid, toname, tosurname, toemail, friendname, friendsurname, false, (mailContent) => {
                 sendResults({
                     eventname,
                     toname,
@@ -89,7 +89,7 @@ app.post('/api/results', [
     });
 })
 
-function createMailContent(eventname, eventdatetime, amount, language, toid, toname, tosurname, toemail, friendname, friendsurname, sendcalendar, callback) {
+function createMailContent(eventname, eventdatetime, amount, language, custommessage, eventlocation, toid, toname, tosurname, toemail, friendname, friendsurname, sendcalendar, callback) {
     let source = '../templates/views/';
     let amountMinMax = '';
 
@@ -119,7 +119,9 @@ function createMailContent(eventname, eventdatetime, amount, language, toid, ton
             "toemail": toemail,
             "friendname": friendname,
             "friendsurname": friendsurname,
-            "amountMinMax": amountMinMax
+            "amountMinMax": amountMinMax,
+            "custommessage": custommessage,
+            "eventlocation": eventlocation,
         }
         var result = template(data);
         callback(result);
