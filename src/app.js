@@ -16,6 +16,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(publicDirectoryPath));
 
+app.get('/unsubscribe', (req, res) => {
+    res.send(req.body.id);
+})
+
 app.post('/api/sendresults', [
     check("eventid", "Event id must be a valid UUID value").isUUID(),
     check("eventname", "Event Name is a required field").notEmpty(),
@@ -40,8 +44,8 @@ app.post('/api/sendresults', [
 
 
     for(let i = 0; i < participants.length; i++) {
-        let {name: toname, surname: tosurname, email: toemail, friendname, friendsurname} = participants[i];
-        createMailContent(eventname, eventdatetime, amount, language, toname, tosurname, toemail, friendname, friendsurname, false, (mailContent) => {
+        let {id: toid, name: toname, surname: tosurname, email: toemail, friendname, friendsurname} = participants[i];
+        createMailContent(eventname, eventdatetime, amount, language, toid, toname, tosurname, toemail, friendname, friendsurname, false, (mailContent) => {
             sendResults({
                 eventname,
                 toname,
@@ -68,7 +72,7 @@ app.post('/api/sendresults', [
     }
 })
 
-function createMailContent(eventname, eventdatetime, amount, language, toname, tosurname, toemail, friendname, friendsurname, sendcalendar, callback) {
+function createMailContent(eventname, eventdatetime, amount, language, toid, toname, tosurname, toemail, friendname, friendsurname, sendcalendar, callback) {
     let source = '../templates/views/';
     let amountMinMax = '';
 
@@ -92,6 +96,7 @@ function createMailContent(eventname, eventdatetime, amount, language, toname, t
         var data = {
             "eventname": eventname,
             "eventdatetime": eventdatetime,
+            "toid": toid,
             "toname": toname,
             "tosurname": tosurname,
             "toemail": toemail,
