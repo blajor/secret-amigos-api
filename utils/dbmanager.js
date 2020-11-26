@@ -8,7 +8,7 @@ function addEvent(event, callback) {
     client.connect(err => {
         if(err) return callback('Unable to connect to database');
         
-        const collection = client.db("amigosdb").collection("events");
+        const collection = client.db(process.env.DB_NAME).collection("events");
         
         collection.insertOne(event, (error, result) => {
             if(error) return callback(error, undefined);
