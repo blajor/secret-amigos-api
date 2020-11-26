@@ -3,13 +3,13 @@ const fs = require('fs');
 const express = require('express');
 const Handlebars = require('handlebars');
 const {sendResults} = require('../utils/mailer');
-const { body, validationResult, check } =  require('express-validator');
+const {addEvent} = require('../utils/dbmanager');
+const { validationResult, check } =  require('express-validator');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 const publicDirectoryPath = path.join(__dirname, '../public');
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -17,10 +17,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(publicDirectoryPath));
 
 app.get('/unsubscribe', (req, res) => {
-    res.send(req.body.id);
+    addEvent({
+        name: 'Jorge',
+        email: 'jrblanco@gmail.com'
+    }, (err) => {
+        if(err) {
+            console.log(err);
+            return res.send('Unable to save event');
+        }
+        res.send(req.query.id);
+    });
 })
 
-app.post('/api/sendresults', [
+app.post('/api/results', [
     check("eventid", "Event id must be a valid UUID value").isUUID(),
     check("eventname", "Event Name is a required field").notEmpty(),
     check("eventdatetime", "Event date time is a required field").notEmpty(),
@@ -42,34 +51,42 @@ app.post('/api/sendresults', [
     if(participants.length < 3 || participants.length > 20)
         return res.status(404).send({error: 'Unable to send < 3 or > 20 participants. Please review and retry.'})
 
+    addEvent(req.body, (err, objectId) => {
+        if(err) {
+            console.log(err);
+            return res.send('Unable to save event');
+        }
 
-    for(let i = 0; i < participants.length; i++) {
-        let {id: toid, name: toname, surname: tosurname, email: toemail, friendname, friendsurname} = participants[i];
-        createMailContent(eventname, eventdatetime, amount, language, toid, toname, tosurname, toemail, friendname, friendsurname, false, (mailContent) => {
-            sendResults({
-                eventname,
-                toname,
-                tosurname,
-                toemail,
-                sendcalendar: false,
-                mailbody: mailContent
-            }, (error, response) => {
-                counter++;
-                if(error) {
-                    if(error.accepted[0]) accepted.push(error.accepted[0]);
-                    if(error.rejected[0]) rejected.push(error.rejected[0]);
-                } else {
-                    if(response.accepted[0]) accepted.push(response.accepted[0]);
-                    if(response.rejected[0]) rejected.push(response.rejected[0]);
+        // res.send(req.query.id);
+        for(let i = 0; i < participants.length; i++) {
+            let {id: toid, name: toname, surname: tosurname, email: toemail, friendname, friendsurname} = participants[i];
+            createMailContent(eventname, eventdatetime, amount, language, toid, toname, tosurname, toemail, friendname, friendsurname, false, (mailContent) => {
+                sendResults({
+                    eventname,
+                    toname,
+                    tosurname,
+                    toemail,
+                    sendcalendar: false,
+                    mailbody: mailContent
+                }, (error, response) => {
+                    counter++;
+                    if(error) {
+                        if(error.accepted) accepted.push(toid);
+                        if(error.rejected[0]) rejected.push(toid);
+                    } else {
+                        if(response.accepted[0]) accepted.push(toid);
+                        if(response.rejected[0]) rejected.push(toid);
                     }
-                if(counter === participants.length)
-                    res.status(200).send({
-                        accepted,
-                        rejected
-                    });
+
+                    if(counter === participants.length)
+                        res.status(200).send({
+                            accepted,
+                            rejected
+                        });
+                });
             });
-        });
-    }
+        }
+    });
 })
 
 function createMailContent(eventname, eventdatetime, amount, language, toid, toname, tosurname, toemail, friendname, friendsurname, sendcalendar, callback) {

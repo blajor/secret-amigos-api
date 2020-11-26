@@ -17,6 +17,7 @@
     "googleapis": "^65.0.0",
     "handlebars": "^4.7.6",
     "hbs": "^4.1.1",
+    "mongodb": "^3.6.3",
     "nodemailer": "^6.4.16"
   },
   "devDependencies": {
