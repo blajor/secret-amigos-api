@@ -5,6 +5,8 @@ const { validationResult, check } =  require('express-validator');
 const {
     addEvent,
     unsubscribeParticipant,
+    resendMessage,
+    confirmParticipant,
     viewParticipantStatus,
     setDB,
 } = require('./controller/appcontroller');
@@ -76,12 +78,28 @@ app.post('/api/results', [
 
         addEvent(req.body, err => {
 
-            if(err) return res.json({error: err});
+            if(err) return res.status(400).json({error: err});
 
             res.sendStatus(200);
         })
     }
 )
+
+app.post('/api/results/resend', [
+    check("eventid", "Event id must be a valid UUID value").isUUID(),
+    check("participantid", "Participant id must be a valid UUID value").isUUID(),
+], (req, res) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    resendMessage(req.body, err => {
+
+        if(err) return res.status(400).json({error: err});
+
+        res.sendStatus(200);
+})
+
+})
 
 app.listen(port, () => {
     console.log('Server is up on port ' + port);

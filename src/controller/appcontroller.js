@@ -3,17 +3,12 @@ const Handlebars = require('handlebars');
 const fs = require('fs');
 const { sendMail } = require('../../utils/mailer');
 const { 
-    unsubsParticipant,
     saveEvent,
+    unsubsParticipant,
     mailSent,
     setDBConnection,
-    findEvent
+    findEvent,
 } = require('../../utils/dbmanager');
-// const { 
-//     // unsubsParticipant,
-//     saveEvent,
-//     mailSent
-// } = require('../../utils/db');
 
 function setDB(db) {
     setDBConnection(db);
@@ -22,7 +17,7 @@ function setDB(db) {
 function addEvent(event, callback) {
 
     //TODO THE FOLLOWING VALIDATION WILL NEED TO BE REMOVED ONCE JWT IS IMPLEMENTED
-    if(typeof myVar === 'undefined' || event.participants.length < 3 || event.participants.length > 20)
+    if(typeof event.participants === 'undefined' || event.participants.length < 3 || event.participants.length > 20)
         return callback('Unable to send < 3 or > 20 participants. Please review and retry.');
 
     saveEvent(event, (err, objectId) => {
@@ -84,7 +79,11 @@ function viewParticipantStatus(eventid, callback) {
 
 function confirmParticipant() {};
 
-function viewEventConfirmations() {};
+function resendMessage({eventid, participantid}, callback) {
+
+
+    callback();
+}
 
 function createMailBody({
     language, 
@@ -146,8 +145,8 @@ function createMailBody({
 module.exports = {
     addEvent,
     unsubscribeParticipant,
+    resendMessage,
     confirmParticipant,
-    viewEventConfirmations,
     viewParticipantStatus,
     setDB,
 }
