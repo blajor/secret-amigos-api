@@ -4,10 +4,7 @@ const path = require('path');
 const { validationResult, check } =  require('express-validator');
 const {
     addEvent,
-    sendParticipanMail,
     unsubscribeParticipant,
-    confirmParticipant,
-    viewEventConfirmations,
     viewParticipantStatus,
     setDB,
 } = require('./controller/appcontroller');
