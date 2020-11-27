@@ -8,6 +8,7 @@ const {
     resendMessage,
     confirmParticipant,
     viewParticipantStatus,
+    deleteEvent,
     setDB,
 } = require('./controller/appcontroller');
 
@@ -96,6 +97,16 @@ app.post('/api/results/resend', [
         res.sendStatus(200);
     })
 
+})
+
+app.delete('/api/events/:eventid', (req, res) => {
+    const eventid = req.params.eventid;
+
+    deleteEvent(eventid, (err, result) => {
+        if(err) return res.sendStatus(404).end();
+
+        res.send(result);
+    })
 })
 
 app.listen(port, () => {

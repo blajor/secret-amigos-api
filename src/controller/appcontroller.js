@@ -8,6 +8,7 @@ const {
     mailSent,
     setDBConnection,
     findEvent,
+    deleteEventSoft,
 } = require('../../utils/dbmanager');
 
 function setDB(db) {
@@ -149,11 +150,20 @@ function createMailBody({
     })
 }
 
+function deleteEvent(eventid, callback) {
+
+    deleteEventSoft(eventid, (err) => {
+        if(err) return callback(err);
+        callback();
+    });
+}
+
 module.exports = {
     addEvent,
     unsubscribeParticipant,
     resendMessage,
     confirmParticipant,
     viewParticipantStatus,
+    deleteEvent,
     setDB,
 }

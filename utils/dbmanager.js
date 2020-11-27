@@ -43,11 +43,15 @@ function unsubsParticipant(eventid, participantid, callback) {
 
     collection.updateOne({
         eventid,
-        "participants.id": participantid
+        "participants.id": participantid,
+        deleted: false
     },
     {
         $set: { "participants.$.unsubscribed": true }
-    }).then(() => callback()).catch((error) => {
+    }).then((result) => {
+        if(result.matchedCount === 1) return callback();
+        callback('Participant does not belong to this event.');
+    }).catch((error) => {
         callback(error);
     });
 }
@@ -58,13 +62,15 @@ function mailSent(eventid, participantid, accepted) {
 
     collection.updateOne({
         eventid,
-        "participants.id": participantid
+        "participants.id": participantid,
+        deleted: false
     },
     {
         $set: { "participants.$.emailSent": accepted }
-    }).then((updated) => {
-        return false;
-    }).catch((error) => {
+    }).then((result) => {
+        if(result.matchedCount === 1) return false;
+        return true;
+    }).catch((_) => {
         return true;
     });
 }
@@ -72,7 +78,7 @@ function mailSent(eventid, participantid, accepted) {
 function findEvent(eventid, callback) {
     const collection = db.collection('events');
 
-    collection.findOne({eventid})
+    collection.findOne({eventid, deleted: false})
     .then(targetEvent => {
         if(targetEvent === null) return callback('Event does not exist.');
         callback(undefined, targetEvent);
@@ -81,10 +87,25 @@ function findEvent(eventid, callback) {
     })
 }
 
+function deleteEventSoft(eventid, callback) {
+    const collection = db.collection('events');
+
+    collection.updateOne({eventid, deleted: false},
+    {
+        $set: { deleted: true }
+    }).then((result) => {
+        if(result.matchedCount === 1) return callback();
+        callback('Event does not exist.');
+    }).catch((error) => {
+        callback(error);
+    });
+}
+
 module.exports = {
     saveEvent,
     unsubsParticipant,
     mailSent,
     setDBConnection,
     findEvent,
+    deleteEventSoft,
 }
