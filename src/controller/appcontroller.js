@@ -16,7 +16,7 @@ function setDB(db) {
 
 function addEvent(event, callback) {
 
-    //TODO THE FOLLOWING VALIDATION WILL NEED TO BE REMOVED ONCE JWT IS IMPLEMENTED
+    //TODO THE > 20 VALIDATION WILL NEED TO BE REMOVED ONCE JWT IS IMPLEMENTED
     if(typeof event.participants === 'undefined' || event.participants.length < 3 || event.participants.length > 20)
         return callback('Unable to send < 3 or > 20 participants. Please review and retry.');
 
@@ -48,14 +48,12 @@ function unsubscribeParticipant(eventid, participantid, callback) {
     unsubsParticipant(eventid, participantid, (err) => {
         if(err) return callback(err);
         callback();
-        // callback(err ?? undefined);
-
     });
 };
 
 function viewParticipantStatus(eventid, callback) {
     findEvent(eventid, (error, targetEvent) => {
-        if(error) return callback(error, undefined);
+        if(error) return callback(error);
 
         let mailaccepted = [];
         let mailrejected = [];
@@ -81,8 +79,17 @@ function confirmParticipant() {};
 
 function resendMessage({eventid, participantid}, callback) {
 
+    findEvent(eventid, (error, targetEvent) => {
+        if(error)
+            return callback(error);
 
-    callback();
+        const targetParticipant = targetEvent.participants.find(participant => participant.id === participantid);
+        if(typeof targetParticipant === 'undefined') 
+            return callback('Participant not in this event.');
+
+        sendParticipantMail(targetEvent, targetParticipant);
+        callback();
+    })
 }
 
 function createMailBody({

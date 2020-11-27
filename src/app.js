@@ -73,17 +73,15 @@ app.post('/api/results', [
     check("participants.*.friendname", "Participant friendname is a required field").notEmpty(),
     ], (req, res) => {
     // if(!req.body) return res.status(404).end();
-        const errors = validationResult(req);
-        if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-        addEvent(req.body, err => {
+    addEvent(req.body, err => {
+        if(err) return res.status(404).json({errors: err});
 
-            if(err) return res.status(400).json({error: err});
-
-            res.sendStatus(200);
-        })
-    }
-)
+        res.sendStatus(200);
+    })
+})
 
 app.post('/api/results/resend', [
     check("eventid", "Event id must be a valid UUID value").isUUID(),
@@ -93,11 +91,10 @@ app.post('/api/results/resend', [
     if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     resendMessage(req.body, err => {
-
-        if(err) return res.status(400).json({error: err});
+        if(err) return res.status(404).json({errors: err});
 
         res.sendStatus(200);
-})
+    })
 
 })
 

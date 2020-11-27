@@ -48,7 +48,6 @@ function unsubsParticipant(eventid, participantid, callback) {
     {
         $set: { "participants.$.unsubscribed": true }
     }).then(() => callback()).catch((error) => {
-        console.log(error); //TODO ERASE
         callback(error);
     });
 }
@@ -75,6 +74,7 @@ function findEvent(eventid, callback) {
 
     collection.findOne({eventid})
     .then(targetEvent => {
+        if(targetEvent === null) return callback('Event does not exist.');
         callback(undefined, targetEvent);
     }).catch((error) => {
         callback(error, undefined);
