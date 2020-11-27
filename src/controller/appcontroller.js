@@ -2,16 +2,22 @@ const path = require('path');
 const Handlebars = require('handlebars');
 const fs = require('fs');
 const { sendMail } = require('../../utils/mailer');
+const { 
+    unsubsParticipant,
+    saveEvent,
+    mailSent,
+    setDBConnection,
+    findEvent
+} = require('../../utils/dbmanager');
 // const { 
-//     unsubsParticipant,
+//     // unsubsParticipant,
 //     saveEvent,
 //     mailSent
-// } = require('../../utils/dbmanager');
-const { 
-    // unsubsParticipant,
-    saveEvent,
-    mailSent
-} = require('../../utils/db');
+// } = require('../../utils/db');
+
+function setDB(db) {
+    setDBConnection(db);
+}
 
 function addEvent(event, callback) {
 
@@ -37,8 +43,9 @@ function sendParticipantMail(event, participant) {
             subject: event.eventname,
             html,
             text: `Secret Amigos dice hola ${participant.name}`
-        }, error => mailSent(event.eventid, participant.id, !error ))
-    
+        }, error => {
+            mailSent(event.eventid, participant.id, !error)
+        })
     });
 };
 
@@ -48,15 +55,38 @@ function unsubscribeParticipant(eventid, participantid, callback) {
     });
 };
 
+function viewParticipantStatus(eventid, callback) {
+    findEvent(eventid, (error, targetEvent) => {
+        if(error) return callback(error, undefined);
+
+        let mailaccepted = [];
+        let mailrejected = [];
+        let invitationconfirmed = [];
+        let participantunsubscribed = [];
+
+        for(const participant of targetEvent.participants) {
+            if(participant.confirmed) invitationconfirmed.push(participant.id);
+            if(participant.unsubscribed) participantunsubscribed.push(participant.id);
+            participant.emailSent ? mailaccepted.push(participant.id) : mailrejected.push(participant.id);
+        }
+
+        callback(undefined, {
+            mailaccepted,
+            mailrejected,
+            invitationconfirmed,
+            participantunsubscribed
+        });
+    })
+};
+
 function confirmParticipant() {};
 
 function viewEventConfirmations() {};
 
-function viewParticipantStatus() {};
-
 function createMailBody({
     language, 
     amount, 
+    eventid,
     eventname,
     eventdatetime,
     custommessage,
@@ -94,6 +124,7 @@ function createMailBody({
         var data = {
             "eventname": eventname,
             "eventdatetime": eventdatetime,
+            "eventid": eventid,
             "toid": id,
             "toname": name,
             "tosurname": surname,
@@ -103,6 +134,7 @@ function createMailBody({
             "amountMinMax": amountMinMax,
             "custommessage": custommessage,
             "eventlocation": eventlocation,
+            "serverurl": process.env.SERVER_URL
         }
         return callback(template(data));
     })
@@ -114,4 +146,5 @@ module.exports = {
     confirmParticipant,
     viewEventConfirmations,
     viewParticipantStatus,
+    setDB,
 }

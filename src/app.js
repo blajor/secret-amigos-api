@@ -1,4 +1,4 @@
-// var mongoUtil = require('../utils/mongoUtil');
+const MongoClient = require('mongodb').MongoClient;
 const express = require('express');
 const path = require('path');
 const { validationResult, check } =  require('express-validator');
@@ -9,12 +9,23 @@ const {
     confirmParticipant,
     viewEventConfirmations,
     viewParticipantStatus,
+    setDB,
 } = require('./controller/appcontroller');
 
 const app = express();
 const port = process.env.PORT || 3000;
-
 const publicDirectoryPath = path.join(__dirname, '../public');
+
+let db;
+
+MongoClient.connect(process.env.DB_URI, { 
+    useNewUrlParser:true,
+    useUnifiedTopology: true,
+    poolSize: 10
+}).then(client => {
+    db = client.db(process.env.DB_NAME);
+    setDB(db);
+}).catch(error => console.log(error));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -34,13 +45,23 @@ app.get('/unsubscribe', [
                 return res.json({ error: err });
 
             res.json({ 
-                message: 'You habe been unsubscribed',
+                message: 'You have been unsubscribed',
                 eventid,
                 participantid
             });
         });
     }
 )
+
+app.get('/api/results/:eventid', (req, res) => {
+    const eventid = req.params.eventid;
+
+    viewParticipantStatus(eventid, (err, result) => {
+        if(err) return res.sendStatus(404).end();
+
+        res.send(result);
+    })
+})
 
 app.post('/api/results', [
     check("eventid", "Event id must be a valid UUID value").isUUID(),

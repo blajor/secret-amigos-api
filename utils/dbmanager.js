@@ -5,6 +5,11 @@ const client = new MongoClient(process.env.DB_URI, {
     useUnifiedTopology: true
 });
 
+let db;
+function setDBConnection(dbConn) {
+    db=dbConn;
+}
+
 function prepareEvent(event) {
     for(let i = 0; i < event.participants.length; i++) {
         event.participants[i].confirmed = undefined;
@@ -18,11 +23,14 @@ function prepareEvent(event) {
 
 function saveEvent(event, callback) {
 
+    const collection = db.collection('events');
+
+    /*
     client.connect(err => {
         if(err) return callback(err);
         
         const collection = client.db(process.env.DB_NAME).collection("events");
-        
+        */
         const preparedEvent = prepareEvent(event);
         preparedEvent.active = true;
 
@@ -33,15 +41,16 @@ function saveEvent(event, callback) {
         .catch((error) => {
             callback(error, undefined)
         });
-    });
+    // });
 }
 
 function unsubsParticipant(eventid, participantid, callback) {
 
-    client.connect(err => {
-        if(err) return callback(err);
+    // client.connect(err => {
+    //     if(err) return callback(err);
 
-        const collection = client.db(process.env.DB_NAME).collection("events");
+    //     const collection = client.db(process.env.DB_NAME).collection("events");
+    const collection = db.collection('events');
 
         collection.updateOne({
             eventid,
@@ -53,22 +62,24 @@ function unsubsParticipant(eventid, participantid, callback) {
             console.log(error); //TODO ERASE
             callback(error);
         });
-    })
+    // })
 }
 
 function mailSent(eventid, participantid, accepted) {
 
-    console.log('*** sending email...'); //TODO ERASE
-    client.connect(err => {
-        if(err) {
-            console.log('*** ERROR UP ***'); //TODO ERASE
-            console.log(err);
-            console.log('*** END ***');
-            client.close();
-            return false;
-        }
+    // console.log('*** sending email...'); //TODO ERASE
+    // client.connect(err => {
+    //     if(err) {
+    //         console.log('*** ERROR UP ***'); //TODO ERASE
+    //         console.log(err);
+    //         console.log('*** END ***');
+    //         client.close();
+    //         return false;
+    //     }
 
-        const collection = client.db(process.env.DB_NAME).collection("events");
+    //     const collection = client.db(process.env.DB_NAME).collection("events");
+
+    const collection = db.collection('events');
 
         collection.updateOne({
             eventid,
@@ -80,21 +91,36 @@ function mailSent(eventid, participantid, accepted) {
             // console.log('*** UPDATED DATA ***'); //TODO ERASE
             // console.log(updated);
             // console.log('*** END UPDATED DATA ***');
-            client.close();
+            // client.close();
             return false;
         }).catch((error) => {
             // console.log('*** ERROR DOWN ***'); //TODO ERASE
             // console.log(error);
             // console.log('*** END ***');
-            client.close();
+            // client.close();
             return true;
         });
+    // })
+    // client.close();
+}
+
+function findEvent(eventid, callback) {
+    const collection = db.collection('events');
+
+    collection.findOne({eventid})
+    .then(targetEvent => {
+        // console.log(targetEvent);
+        callback(undefined, targetEvent);
+    }).catch((error) => {
+        // console.log(error);
+        callback(error, undefined);
     })
-    client.close();
 }
 
 module.exports = {
     saveEvent,
     unsubsParticipant,
-    mailSent
+    mailSent,
+    setDBConnection,
+    findEvent,
 }

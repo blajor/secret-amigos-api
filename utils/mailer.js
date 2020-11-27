@@ -77,8 +77,8 @@ function sendMail({
     };
 
     smtpTransport.sendMail(mailOptions, (error, response) => {
-        if(error) callback(false);
-        else callback( response.accepted[0] || !response.rejected[0] );
+        if(error) callback(true);
+        else callback( !(response.accepted.length === 1) );
         
         smtpTransport.close();
     })
