@@ -14,7 +14,7 @@ const smtpTransport = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         type: 'OAuth2',
-        user: 'secret.amigos.app@gmail.com',
+        user: process.env.MAIL_USER,
         clientId: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
@@ -25,6 +25,7 @@ const smtpTransport = nodemailer.createTransport({
     }
 });
 
+/*
 const sendResults = ({
     eventname, 
     toname,
@@ -57,8 +58,33 @@ const sendResults = ({
         // }
     })
 
+}*/
+
+function sendMail({
+    to,
+    subject,
+    html,
+    text
+}, callback) {
+
+    const mailOptions = {
+        from: 'Secret Amigos <secret.amigos.app@gmail.com>',
+        to,
+        subject,
+        generateTextFromHTML: true,
+        html,
+        text
+    };
+
+    smtpTransport.sendMail(mailOptions, (error, response) => {
+        if(error) callback(false);
+        else callback( response.accepted[0] || !response.rejected[0] );
+        
+        smtpTransport.close();
+    })
 }
 
 module.exports = {
-    sendResults
+    // sendResults,
+    sendMail
 }
