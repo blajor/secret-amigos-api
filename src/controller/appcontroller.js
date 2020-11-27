@@ -51,7 +51,10 @@ function sendParticipantMail(event, participant) {
 
 function unsubscribeParticipant(eventid, participantid, callback) {
     unsubsParticipant(eventid, participantid, (err) => {
-        callback(err ?? undefined);
+        if(err) return callback(err);
+        callback();
+        // callback(err ?? undefined);
+
     });
 };
 
