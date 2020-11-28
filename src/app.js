@@ -11,6 +11,7 @@ const {
     deleteEvent,
     setDB,
 } = require('./controller/appcontroller');
+const { authenticateToken } = require('../utils/authenticator');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -53,7 +54,7 @@ app.get('/unsubscribe', [
     }
 )
 
-app.get('/api/results/:eventid', (req, res) => {
+app.get('/api/results/:eventid', authenticateToken, (req, res) => {
     const eventid = req.params.eventid;
 
     viewParticipantStatus(eventid, (err, result) => {
@@ -72,7 +73,7 @@ app.post('/api/results', [
     check("participants.*.name", "Participant name is a required field").notEmpty(),
     check("participants.*.email", "Participant email is a required field").notEmpty(),
     check("participants.*.friendname", "Participant friendname is a required field").notEmpty(),
-    ], (req, res) => {
+    ], authenticateToken, (req, res) => {
     // if(!req.body) return res.status(404).end();
     const errors = validationResult(req);
     if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -87,7 +88,7 @@ app.post('/api/results', [
 app.post('/api/results/resend', [
     check("eventid", "Event id must be a valid UUID value").isUUID(),
     check("participantid", "Participant id must be a valid UUID value").isUUID(),
-], (req, res) => {
+], authenticateToken, (req, res) => {
     const errors = validationResult(req);
     if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
@@ -99,7 +100,7 @@ app.post('/api/results/resend', [
 
 })
 
-app.delete('/api/events/:eventid', (req, res) => {
+app.delete('/api/events/:eventid', authenticateToken, (req, res) => {
     const eventid = req.params.eventid;
 
     deleteEvent(eventid, (err, result) => {
