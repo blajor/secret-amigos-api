@@ -107,10 +107,23 @@ function findEvent(eventid, callback) {
     })
 }
 
-// TODO COMPLETE IMPLEMENTATION
-// function findParticipant(eventid, participantid, callback) {
-//     const collection = db.collection()
-// }
+function findParticipant(eventid, participantid, callback) {
+    const collection = db.collection('events')
+
+    collection.findOne({eventid, deleted: false})
+    .then(targetEvent => {
+        if(targetEvent === null) return callback('Event does not exist.')
+
+        let targetParticipant = targetEvent.participants.find(particip => particip.id === participantid)
+
+        if(typeof targetParticipant !== 'undefined')
+            return callback(undefined, targetParticipant)
+
+        callback('Participant does not belong to this event.')
+    }).catch((error) => {
+        callback(error, undefined)
+    })
+}
 
 function deleteEventSoft(eventid, callback) {
     const collection = db.collection('events');
@@ -134,4 +147,5 @@ module.exports = {
     findEvent,
     confParticipant,
     deleteEventSoft,
+    findParticipant,
 }

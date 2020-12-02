@@ -93,7 +93,7 @@ app.post('/api/results', [
     check("participants.*.id", "Participant id must be a valid UUID value").isUUID(),
     check("participants.*.name", "Participant name is a required field").notEmpty(),
     check("participants.*.email", "Participant email is a required field").notEmpty(),
-    check("participants.*.friendname", "Participant friendname is a required field").notEmpty(),
+    check("participants.*.friendid", "Participant friendid is a required field").notEmpty(),
     ], authenticateToken, (req, res) => {
     // if(!req.body) return res.status(404).end();
     const errors = validationResult(req);

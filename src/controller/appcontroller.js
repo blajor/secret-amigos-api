@@ -10,6 +10,7 @@ const {
     findEvent,
     deleteEventSoft,
     confParticipant,
+    findParticipant,
 } = require('../../utils/dbmanager');
 const { getIcalObjectInstance } = require('../../utils/ical');
 
@@ -20,7 +21,7 @@ function setDB(db) {
 function eventGateway(event, callback) {
 
     if(typeof event.participants === 'undefined' || event.participants.length < 3)
-        return callback('Unable to send < 3 or > 20 participants. Please review and retry.');
+        return callback('Unable to send < 3 participants. Please review and retry.');
 
     saveEvent(event, (err, objectId) => {
 
@@ -49,6 +50,8 @@ function sendParticipantMail(event, participant) {
         }
         mailOptions.attachments.push(calendarObj)
     }
+
+
 
     createMailBody(event, participant, (html) => {
         mailOptions.html = html
@@ -125,8 +128,9 @@ function createMailBody({
     name,
     surname,
     email,
-    friendname,
-    friendsurname
+    friendid
+    // friendname,
+    // friendsurname
 }, callback) {
 
     let source = '../../templates/views/';
@@ -164,26 +168,33 @@ function createMailBody({
         default:
             source = source + 'esp.html';
     }
-    file = fs.readFile(path.join(__dirname, source), (err, data) => {
-        if(err) return callback(null);
 
-        var template = Handlebars.compile(data.toString());
-        var data = {
-            "eventname": eventname,
-            "eventdatetime": eventdatetime,
-            "eventid": eventid,
-            "toid": id,
-            "toname": name,
-            "tosurname": surname,
-            "toemail": email,
-            "friendname": friendname,
-            "friendsurname": friendsurname,
-            "amountMinMax": amountMinMax,
-            "custommessage": custommessage,
-            "eventlocation": eventlocation,
-            "serverurl": process.env.SERVER_URL
+    findParticipant(eventid, friendid, (error, friend) => {
+        if(error) return callback(null)
+
+        else {
+            file = fs.readFile(path.join(__dirname, source), (err, data) => {
+                if(err) return callback(null);
+        
+                var template = Handlebars.compile(data.toString());
+                var data = {
+                    "eventname": eventname,
+                    "eventdatetime": eventdatetime,
+                    "eventid": eventid,
+                    "toid": id,
+                    "toname": name,
+                    "tosurname": surname,
+                    "toemail": email,
+                    "friendname": friend.name,
+                    "friendsurname": friend.surname,
+                    "amountMinMax": amountMinMax,
+                    "custommessage": custommessage,
+                    "eventlocation": eventlocation,
+                    "serverurl": process.env.SERVER_URL
+                }
+                return callback(template(data));
+            })
         }
-        return callback(template(data));
     })
 }
 
