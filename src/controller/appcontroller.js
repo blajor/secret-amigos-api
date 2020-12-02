@@ -82,18 +82,25 @@ function viewParticipantStatus(eventid, callback) {
 
         let mailaccepted = [];
         let mailrejected = [];
+        let mailpending = [];
         let invitationconfirmed = [];
         let participantunsubscribed = [];
 
         for(const participant of targetEvent.participants) {
             if(participant.confirmed) invitationconfirmed.push(participant.id);
             if(participant.unsubscribed) participantunsubscribed.push(participant.id);
-            participant.emailSent ? mailaccepted.push(participant.id) : mailrejected.push(participant.id);
+            if(participant.emailSent)
+                mailaccepted.push(participant.id)
+            else if (participant.emailSent === false)
+                mailrejected.push(participant.id);
+            else
+                mailpending.push(participant.id);
         }
 
         callback(undefined, {
             mailaccepted,
             mailrejected,
+            mailpending,
             invitationconfirmed,
             participantunsubscribed
         });
