@@ -33,6 +33,7 @@ function saveEvent(event, callback) {
         callback(undefined, updatedEvent._id)
     })
     .catch((error) => {
+        console.error(error)
         callback(error, undefined)
     });
 }

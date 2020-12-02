@@ -64,7 +64,8 @@ function sendMail({
     to,
     subject,
     html,
-    text
+    text,
+    attachments
 }, callback) {
 
     const mailOptions = {
@@ -73,7 +74,8 @@ function sendMail({
         subject,
         generateTextFromHTML: true,
         html,
-        text
+        text,
+        attachments
     };
 
     smtpTransport.sendMail(mailOptions, (error, response) => {

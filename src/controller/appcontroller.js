@@ -10,6 +10,7 @@ const {
     findEvent,
     deleteEventSoft,
 } = require('../../utils/dbmanager');
+const { getIcalObjectInstance } = require('../../utils/ical');
 
 function setDB(db) {
     setDBConnection(db);
@@ -33,13 +34,30 @@ function addEvent(event, callback) {
 
 function sendParticipantMail(event, participant) {
 
+    const calendarObj = getIcalObjectInstance(
+        event.eventdatetime,
+        event.eventname,
+        event.custommessage,
+        event.eventlocation,
+    )
+
+    var mailOptions = {
+        to: `${participant.name} ${participant.surname} <${participant.email}>`,
+        subject: event.eventname,
+        text: `Secret Amigos dice hola ${participant.name}`,
+        attachments: [
+            {
+                filename: 'event.ics',
+                content: Buffer.from(calendarObj.toString()),
+                contentType: 'text/calendar'
+            }
+        ]
+    }
+
     createMailBody(event, participant, (html) => {
-        sendMail({
-            to: `${participant.name} ${participant.surname} <${participant.email}>`,
-            subject: event.eventname,
-            html,
-            text: `Secret Amigos dice hola ${participant.name}`
-        }, error => {
+        mailOptions.html = html
+
+        sendMail(mailOptions, error => {
             mailSent(event.eventid, participant.id, !error)
         })
     });
