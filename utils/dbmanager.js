@@ -57,6 +57,25 @@ function unsubsParticipant(eventid, participantid, callback) {
     });
 }
 
+function confParticipant(eventid, participantid, callback) {
+
+    const collection = db.collection('events');
+
+    collection.updateOne({
+        eventid,
+        "participants.id": participantid,
+        deleted: false
+    },
+    {
+        $set: { "participants.$.confirmed": true }
+    }).then((result) => {
+        if(result.matchedCount === 1) return callback();
+        callback('Participant does not belong to this event.');
+    }).catch((error) => {
+        callback(error);
+    });
+}
+
 function mailSent(eventid, participantid, accepted) {
 
     const collection = db.collection('events');
@@ -108,5 +127,6 @@ module.exports = {
     mailSent,
     setDBConnection,
     findEvent,
+    confParticipant,
     deleteEventSoft,
 }

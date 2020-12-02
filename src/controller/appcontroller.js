@@ -9,6 +9,7 @@ const {
     setDBConnection,
     findEvent,
     deleteEventSoft,
+    confParticipant,
 } = require('../../utils/dbmanager');
 const { getIcalObjectInstance } = require('../../utils/ical');
 
@@ -63,6 +64,13 @@ function sendParticipantMail(event, participant) {
     });
 };
 
+function confirmParticipant(eventid, participantid, callback) {
+    confParticipant(eventid, participantid, (err) => {
+        if(err) return callback(err);
+        callback();
+    });
+};
+
 function unsubscribeParticipant(eventid, participantid, callback) {
     unsubsParticipant(eventid, participantid, (err) => {
         if(err) return callback(err);
@@ -93,8 +101,6 @@ function viewParticipantStatus(eventid, callback) {
         });
     })
 };
-
-function confirmParticipant() {};
 
 function resendMessage({eventid, participantid}, callback) {
 

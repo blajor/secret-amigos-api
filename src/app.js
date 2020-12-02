@@ -54,6 +54,27 @@ app.get('/unsubscribe', [
     }
 )
 
+app.get('/confirm', [
+    check("eventid", "eventid").isUUID(),
+    check("participantid", "participantid").isUUID()
+    ], (req, res) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+        const { eventid, participantid } = req.query;
+        confirmParticipant(eventid, participantid, (err) => {
+            if(err) 
+                return res.json({ error: err });
+
+            res.json({ 
+                message: 'You have been confirmed!!',
+                eventid,
+                participantid
+            });
+        });
+    }
+)
+
 app.get('/api/results/:eventid', authenticateToken, (req, res) => {
     const eventid = req.params.eventid;
 
