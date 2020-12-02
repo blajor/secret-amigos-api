@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 const { validationResult, check } =  require('express-validator');
 const {
-    addEvent,
+    eventGateway,
     unsubscribeParticipant,
     resendMessage,
     confirmParticipant,
@@ -88,7 +88,7 @@ app.get('/api/results/:eventid', authenticateToken, (req, res) => {
 app.post('/api/results', [
     check("eventid", "Event id must be a valid UUID value").isUUID(),
     check("eventname", "Event Name is a required field").notEmpty(),
-    check("eventdatetime", "Event date time is a required field").notEmpty(),
+    // check("eventdatetime", "Event date time is a required field").notEmpty(),
     check("language", "Language required field").notEmpty(),
     check("participants.*.id", "Participant id must be a valid UUID value").isUUID(),
     check("participants.*.name", "Participant name is a required field").notEmpty(),
@@ -99,7 +99,7 @@ app.post('/api/results', [
     const errors = validationResult(req);
     if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    addEvent(req.body, err => {
+    eventGateway(req.body, err => {
         if(err) return res.status(404).json({errors: err});
 
         res.sendStatus(200);

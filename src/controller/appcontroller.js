@@ -17,7 +17,7 @@ function setDB(db) {
     setDBConnection(db);
 }
 
-function addEvent(event, callback) {
+function eventGateway(event, callback) {
 
     if(typeof event.participants === 'undefined' || event.participants.length < 3)
         return callback('Unable to send < 3 or > 20 participants. Please review and retry.');
@@ -34,24 +34,20 @@ function addEvent(event, callback) {
 
 function sendParticipantMail(event, participant) {
 
-    const calendarObj = getIcalObjectInstance(
-        event.eventdatetime,
-        event.eventname,
-        event.custommessage,
-        event.eventlocation,
-    )
-
     var mailOptions = {
         to: `${participant.name} ${participant.surname} <${participant.email}>`,
         subject: event.eventname,
         text: `Secret Amigos dice hola ${participant.name}`,
-        attachments: [
-            {
-                filename: 'event.ics',
-                content: Buffer.from(calendarObj.toString()),
-                contentType: 'text/calendar'
-            }
-        ]
+        attachments: []
+    }
+
+    if(event.eventdatetime !== '') {
+        const calendarObj = {
+            filename: 'event.ics',
+            content: Buffer.from(getIcalObjectInstance(event.eventdatetime, event.eventname, event.custommessage, event.eventlocation).toString()),
+            contentType: 'text/calendar'
+        }
+        mailOptions.attachments.push(calendarObj)
     }
 
     createMailBody(event, participant, (html) => {
@@ -139,21 +135,31 @@ function createMailBody({
     switch(language) {
         case 'es':
             source = source + 'esp.html';
-            if(amount)
+            if(amount.min !== '' || amount.max !== '') {
                 amountMinMax = 'Monto sugerido '
-                if(amount.min !== null && amount.max !== null)
+                if(amount.min !== '' && amount.max !== '')
                     amountMinMax += 'entre ' + amount.min + ' y ' + amount.max
-                else
+                else {
                     amountMinMax += amount.min
+                    amountMinMax += amount.max
+                }
+            }
+            if(eventdatetime !== '')
+                eventdatetime = 'Fecha y hora: ' + eventdatetime
             break;
         case 'en':
             source = source + 'eng.html';
-            if(amount)
+            if(amount.min !== '' || amount.max !== '') {
                 amountMinMax = 'Suggested amount '
-                if(amount.min !== null && amount.max !== null)
+                if(amount.min !== '' && amount.max !== '')
                     amountMinMax += 'between ' + amount.min + ' and ' + amount.max
-                else
+                else {
                     amountMinMax += amount.min
+                    amountMinMax += amount.max
+                }
+            }
+            if(eventdatetime !== '')
+                eventdatetime = 'Date time: ' + eventdatetime
             break;
         default:
             source = source + 'esp.html';
@@ -190,7 +196,7 @@ function deleteEvent(eventid, callback) {
 }
 
 module.exports = {
-    addEvent,
+    eventGateway,
     unsubscribeParticipant,
     resendMessage,
     confirmParticipant,

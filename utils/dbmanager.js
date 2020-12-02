@@ -107,6 +107,11 @@ function findEvent(eventid, callback) {
     })
 }
 
+// TODO COMPLETE IMPLEMENTATION
+// function findParticipant(eventid, participantid, callback) {
+//     const collection = db.collection()
+// }
+
 function deleteEventSoft(eventid, callback) {
     const collection = db.collection('events');
 

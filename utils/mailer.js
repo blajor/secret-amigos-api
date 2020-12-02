@@ -25,41 +25,6 @@ const smtpTransport = nodemailer.createTransport({
     }
 });
 
-/*
-const sendResults = ({
-    eventname, 
-    toname,
-    tosurname,
-    toemail,
-    sendcalendar=false,
-    mailbody
-}, callback) => {
-
-    const mailOptions = {
-        from: 'Secret Amigos <secret.amigos.app@gmail.com>',
-        to: `${toname} ${tosurname} <${toemail}>`,
-        // bcc: 'jrblanco@gmail.com',
-        subject: eventname,
-        generateTextFromHTML: true,
-        html: mailbody,
-        text: `Secret Amigos. Hola ${toname}!`
-    };
-
-    smtpTransport.sendMail(mailOptions, (error, response) => {
-        error? callback(error, undefined): callback(undefined, response);
-            smtpTransport.close();
-            // return resp;
-        // } else {
-            // resp = response;
-            // console.log(resp);
-            // smtpTransport.close();
-            // return response;
-            // callback(undefined, response);
-        // }
-    })
-
-}*/
-
 function sendMail({
     to,
     subject,
