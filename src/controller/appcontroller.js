@@ -19,7 +19,7 @@ function setDB(db) {
 function addEvent(event, callback) {
 
     //TODO THE > 20 VALIDATION WILL NEED TO BE REMOVED ONCE JWT IS IMPLEMENTED
-    if(typeof event.participants === 'undefined' || event.participants.length < 3 || event.participants.length > 20)
+    if(typeof event.participants === 'undefined' || event.participants.length < 3)
         return callback('Unable to send < 3 or > 20 participants. Please review and retry.');
 
     saveEvent(event, (err, objectId) => {
