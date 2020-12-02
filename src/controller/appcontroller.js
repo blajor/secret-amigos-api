@@ -19,7 +19,6 @@ function setDB(db) {
 
 function addEvent(event, callback) {
 
-    //TODO THE > 20 VALIDATION WILL NEED TO BE REMOVED ONCE JWT IS IMPLEMENTED
     if(typeof event.participants === 'undefined' || event.participants.length < 3)
         return callback('Unable to send < 3 or > 20 participants. Please review and retry.');
 
@@ -141,12 +140,20 @@ function createMailBody({
         case 'es':
             source = source + 'esp.html';
             if(amount)
-                amountMinMax = 'Monto min: ' + amount.min + ' y max: ' + amount.max
+                amountMinMax = 'Monto sugerido '
+                if(amount.min !== null && amount.max !== null)
+                    amountMinMax += 'entre ' + amount.min + ' y ' + amount.max
+                else
+                    amountMinMax += amount.min
             break;
         case 'en':
             source = source + 'eng.html';
             if(amount)
-                amountMinMax = 'Amount min: ' + amount.min + ' and max: ' + amount.max
+                amountMinMax = 'Suggested amount '
+                if(amount.min !== null && amount.max !== null)
+                    amountMinMax += 'between ' + amount.min + ' and ' + amount.max
+                else
+                    amountMinMax += amount.min
             break;
         default:
             source = source + 'esp.html';
