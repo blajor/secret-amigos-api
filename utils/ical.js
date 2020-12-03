@@ -8,7 +8,7 @@ function getIcalObjectInstance(
     ) {
 
     let endtime = new Date(starttime)
-    endtime.setMinutes(endtime.getMinutes() + process.env.CALENDAR_EVENT_DURATION)
+    endtime.setMinutes(endtime.getMinutes() + 90)
     // console.log(endtime.toDateString())
 
     const cal = ical({ domain: process.env.DOMAIN_NAME, name: 'Secret Amigo Event' });
