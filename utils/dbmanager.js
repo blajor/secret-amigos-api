@@ -76,7 +76,7 @@ function confParticipant(eventid, participantid, callback) {
     });
 }
 
-function mailSent(eventid, participantid, accepted) {
+function mailSent(eventid, participantid, error) {
 
     const collection = db.collection('events');
 
@@ -86,7 +86,10 @@ function mailSent(eventid, participantid, accepted) {
         deleted: false
     },
     {
-        $set: { "participants.$.emailSent": accepted }
+        $set: { 
+            "participants.$.emailSent": error === false,
+            "participants.$.emailerror": error
+         }
     }).then((result) => {
         if(result.matchedCount === 1) return false;
         return true;

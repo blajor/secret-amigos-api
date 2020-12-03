@@ -57,7 +57,7 @@ function sendParticipantMail(event, participant) {
         mailOptions.html = html
 
         sendMail(mailOptions, error => {
-            mailSent(event.eventid, participant.id, !error)
+            mailSent(event.eventid, participant.id, error)
         })
     });
 };

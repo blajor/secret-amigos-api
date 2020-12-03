@@ -1,29 +1,47 @@
 const nodemailer = require('nodemailer');
-const { google } = require('googleapis');
-const OAuth2 = google.auth.OAuth2;
+// const { google } = require('googleapis');
+// const OAuth2 = google.auth.OAuth2;
 
-const oauth2Client = new OAuth2(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, 'https://developers.google.com/oauthplayground');
+// const oauth2Client = new OAuth2(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, 'https://developers.google.com/oauthplayground');
 
-oauth2Client.setCredentials({
-    refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-});
+// oauth2Client.setCredentials({
+//     refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+// });
 
-const accessToken = oauth2Client.getAccessToken();
+// const accessToken = oauth2Client.getAccessToken();
+
+// const smtpTransport = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//         type: 'OAuth2',
+//         user: process.env.MAIL_USER,
+//         clientId: process.env.GOOGLE_CLIENT_ID,
+//         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+//         refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+//         accessToken,
+//         // tls: {
+//         //     rejectUnauthorized: false
+//         // }
+//     }
+// });
 
 const smtpTransport = nodemailer.createTransport({
-    service: 'gmail',
+    // pool: true,
+    host: 'mail.privateemail.com',
+    port: 587,
+    // secure: process.env.MAIL_SECURE,
+    secure: false,
     auth: {
-        type: 'OAuth2',
         user: process.env.MAIL_USER,
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-        accessToken,
-        // tls: {
-        //     rejectUnauthorized: false
-        // }
-    }
-});
+        pass: process.env.MAIL_PASS
+    },
+    // tls: {
+    //     // rejectUnauthorized: process.env.MAIL_REJECT_UNAUTH
+    //     rejectUnauthorized: false
+    // }
+})
+
+
 
 function sendMail({
     to,
@@ -34,7 +52,7 @@ function sendMail({
 }, callback) {
 
     const mailOptions = {
-        from: 'Secret Amigos <secret.amigos.app@gmail.com>',
+        from: `Secret Amigos <${process.env.MAIL_USER}>`,
         to,
         subject,
         generateTextFromHTML: true,
@@ -44,7 +62,7 @@ function sendMail({
     };
 
     smtpTransport.sendMail(mailOptions, (error, response) => {
-        if(error) callback(true);
+        if(error) callback(error);
         else callback( !(response.accepted.length === 1) );
         
         smtpTransport.close();

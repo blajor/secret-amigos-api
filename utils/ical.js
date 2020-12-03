@@ -8,12 +8,12 @@ function getIcalObjectInstance(
     ) {
 
     let endtime = new Date(starttime)
-    endtime.setMinutes(endtime.getMinutes() + 90)
+    endtime.setMinutes(endtime.getMinutes() + process.env.CALENDAR_EVENT_DURATION)
     // console.log(endtime.toDateString())
 
-    const cal = ical({ domain: "mytestwebsite.com", name: 'My test calendar event' });
+    const cal = ical({ domain: process.env.DOMAIN_NAME, name: 'Secret Amigo Event' });
     
-    cal.domain("mytestwebsite.com");
+    cal.domain(process.env.DOMAIN_NAME);
     cal.createEvent({
         start: starttime,         // eg : moment()
         end: endtime,             // eg : moment(1,'days')
@@ -22,8 +22,8 @@ function getIcalObjectInstance(
         location: location,       // 'Delhi'
         url: '',                 // 'event url'
         organizer: {              // 'organizer details'
-            name: 'Secret Amigos',
-            email: 'secret.amigos.app@gmail.com'
+            name: 'Secret Amigo',
+            email: process.env.MAIL_USER
         },
     });
     return cal;
