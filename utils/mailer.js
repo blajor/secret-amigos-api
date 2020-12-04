@@ -52,7 +52,7 @@ function sendMail({
 }, callback) {
 
     const mailOptions = {
-        from: `Secret Amigos <${process.env.MAIL_USER}>`,
+        from: `Secret Amigo <${process.env.MAIL_USER}>`,
         to,
         subject,
         generateTextFromHTML: true,

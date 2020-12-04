@@ -38,7 +38,7 @@ function sendParticipantMail(event, participant) {
     var mailOptions = {
         to: `${participant.name} ${participant.surname} <${participant.email}>`,
         subject: event.eventname,
-        text: `Secret Amigos dice hola ${participant.name}`,
+        text: `Secret Amigo dice hola ${participant.name}`,
         attachments: []
     }
 
