@@ -1,14 +1,22 @@
 <p>Hola {{toname}}!</p>
 
 <p>Evento: {{eventname}}</p>
-<p>{{eventdatetime}}</p>
+<p>{{datetime}}</p>
 <p>{{amountMinMax}}</p>
-<p>{{eventlocation}}</p>
+<p>{{location}}</p>
 
 <p>Nombre amigo: {{friendname}} {{friendsurname}}</p>
-<img src="https://secret-amigos-api.herokuapp.com/images/image_from_ios.png" height="42" width="42" style="vertical-align: middle" alt="logo">
+<img src="{{serverurl}}/images/image_from_ios.png" height="42" width="42" style="vertical-align: middle" alt="logo">
 
 <p>{{custommessage}}</p>
+
+<div style="display:{{confVisible}};">
 <a href="{{serverurl}}/confirm?eventid={{eventid}}&participantid={{toid}}">Confirma tu participación!!</a>
+</div>
 
 <p style="color: grey; font-size:small;">Este mensaje te fue enviado a solicitud del organizador de este evento. Si no estas interesado en participar de este evento haz click <a href="{{serverurl}}/unsubscribe?eventid={{eventid}}&participantid={{toid}}" style="font-style: italic;">aqui</a>.</p>
+
+<a href="https://www.apple.com/app-store/">
+    <img src="https://secret-amigos-api.herokuapp.com/images/App_Store_Icon.png" height="42" style="vertical-align: middle" alt="Apple_Store">
+</a>
+

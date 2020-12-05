@@ -1,13 +1,16 @@
-// const { MongoClient, ObjectID } = require('mongodb');
-
-// const client = new MongoClient(process.env.DB_URI, { 
-//     useNewUrlParser: true, 
-//     useUnifiedTopology: true
-// });
+const MongoClient = require('mongodb').MongoClient;
 
 let db;
-function setDBConnection(dbConn) {
-    db=dbConn;
+
+function setDBConnection() {
+    MongoClient.connect(process.env.DB_URI, { 
+    useNewUrlParser:true,
+    useUnifiedTopology: true,
+    poolSize: 10
+    }).then(client => {
+        db = client.db(process.env.DB_NAME);
+        console.log(`DB connection up and running: '${process.env.DB_NAME}'`)
+    }).catch(error => console.log(error));
 }
 
 function prepareEvent(event) {
@@ -21,21 +24,21 @@ function prepareEvent(event) {
     return event;
 }
 
-function saveEvent(event, callback) {
+function saveEvent(event) {
 
     const collection = db.collection('events');
 
     const preparedEvent = prepareEvent(event);
     preparedEvent.active = true;
 
-    collection.updateOne({eventid: preparedEvent.eventid}, { $set: preparedEvent }, {upsert: true})
+    collection.updateOne({id: preparedEvent.id}, { $set: preparedEvent }, {upsert: true})
     .then((updatedEvent) => {
-        callback(undefined, updatedEvent._id)
     })
     .catch((error) => {
-        console.error(error)
-        callback(error, undefined)
+        console.error(error) //TODO CONSOLE LOG OK
     });
+
+    return
 }
 
 function unsubsParticipant(eventid, participantid, callback) {
@@ -43,7 +46,7 @@ function unsubsParticipant(eventid, participantid, callback) {
     const collection = db.collection('events');
 
     collection.updateOne({
-        eventid,
+        "id": eventid,
         "participants.id": participantid,
         deleted: false
     },
@@ -62,7 +65,7 @@ function confParticipant(eventid, participantid, callback) {
     const collection = db.collection('events');
 
     collection.updateOne({
-        eventid,
+        "id": eventid,
         "participants.id": participantid,
         deleted: false
     },
@@ -81,7 +84,7 @@ function mailSent(eventid, participantid, error) {
     const collection = db.collection('events');
 
     collection.updateOne({
-        eventid,
+        "id": eventid,
         "participants.id": participantid,
         deleted: false
     },
@@ -98,10 +101,10 @@ function mailSent(eventid, participantid, error) {
     });
 }
 
-function findEvent(eventid, callback) {
+function findEvent(id, callback) {
     const collection = db.collection('events');
 
-    collection.findOne({eventid, deleted: false})
+    collection.findOne({id, deleted: false})
     .then(targetEvent => {
         if(targetEvent === null) return callback('Event does not exist.');
         callback(undefined, targetEvent);
@@ -113,7 +116,7 @@ function findEvent(eventid, callback) {
 function findParticipant(eventid, participantid, callback) {
     const collection = db.collection('events')
 
-    collection.findOne({eventid, deleted: false})
+    collection.findOne({"id": eventid, deleted: false})
     .then(targetEvent => {
         if(targetEvent === null) return callback('Event does not exist.')
 
@@ -128,10 +131,10 @@ function findParticipant(eventid, participantid, callback) {
     })
 }
 
-function deleteEventSoft(eventid, callback) {
+function deleteEventSoft(id, callback) {
     const collection = db.collection('events');
 
-    collection.updateOne({eventid, deleted: false},
+    collection.updateOne({id, deleted: false},
     {
         $set: { deleted: true }
     }).then((result) => {

@@ -35,10 +35,10 @@ const smtpTransport = nodemailer.createTransport({
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS
     },
-    // tls: {
-    //     // rejectUnauthorized: process.env.MAIL_REJECT_UNAUTH
-    //     rejectUnauthorized: false
-    // }
+    tls: {
+        // rejectUnauthorized: process.env.MAIL_REJECT_UNAUTH
+        rejectUnauthorized: false
+    }
 })
 
 
@@ -62,7 +62,10 @@ function sendMail({
     };
 
     smtpTransport.sendMail(mailOptions, (error, response) => {
-        if(error) callback(error);
+        if(error) {
+            console.log(error)
+            callback(error);
+        } 
         else callback( !(response.accepted.length === 1) );
         
         smtpTransport.close();

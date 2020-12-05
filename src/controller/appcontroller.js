@@ -14,8 +14,8 @@ const {
 } = require('../../utils/dbmanager');
 const { getIcalObjectInstance } = require('../../utils/ical');
 
-function setDB(db) {
-    setDBConnection(db);
+function setDB() {
+    setDBConnection();
 }
 
 function eventGateway(event, callback) {
@@ -23,43 +23,49 @@ function eventGateway(event, callback) {
     if(typeof event.participants === 'undefined' || event.participants.length < 3)
         return callback('Unable to send < 3 participants. Please review and retry.');
 
-    saveEvent(event, (err, objectId) => {
+    if(event.sendemails) {
+        console.log("mails para todos..!!") //TODO ERASE
+        event.participants.forEach(participant => sendParticipantMail(event, participant))
+    }
+    else {
+        event.participants.forEach(participant => {
+            console.log('mails selectivos...') //TODO ERASE
+            if(participant.sendemail) sendParticipantMail(event, participant)
+        })
+    }
 
-        if(err) return callback(err);
-
-        event.participants.forEach(participant => sendParticipantMail(event, participant));
-        callback();
-    });
-
+    saveEvent(event)
+    callback()
 };
 
 function sendParticipantMail(event, participant) {
 
+    console.log(`mail para ${participant.name}`) //TODO ERASE
     var mailOptions = {
         to: `${participant.name} ${participant.surname} <${participant.email}>`,
-        subject: event.eventname,
-        text: `Secret Amigo dice hola ${participant.name}`,
+        subject: event.name,
+        // text: `Secret Amigo dice hola ${participant.name}`,
         attachments: []
     }
 
-    if(event.eventdatetime !== '') {
+    if(event.datetime !== '') {
         const calendarObj = {
             filename: 'event.ics',
-            content: Buffer.from(getIcalObjectInstance(event.eventdatetime, event.eventname, event.custommessage, event.eventlocation).toString()),
+            content: Buffer.from(getIcalObjectInstance(event.datetime, event.name, event.custommessage, event.location).toString()),
             contentType: 'text/calendar'
         }
         mailOptions.attachments.push(calendarObj)
     }
 
-
-
-    createMailBody(event, participant, (html) => {
+    createMailBody(event, participant, (html, text) => {
         mailOptions.html = html
+        mailOptions.text = text
 
         sendMail(mailOptions, error => {
-            mailSent(event.eventid, participant.id, error)
+            mailSent(event.id, participant.id, error)
+            console.error(participant.name, " ==> ", error) //TODO ERASE
         })
-    });
+    })
 };
 
 function confirmParticipant(eventid, participantid, callback) {
@@ -107,107 +113,91 @@ function viewParticipantStatus(eventid, callback) {
     })
 };
 
-function resendMessage({eventid, participantid}, callback) {
+function createMailBody(event, participant, callback) {
 
-    findEvent(eventid, (error, targetEvent) => {
-        if(error)
-            return callback(error);
+    let htmlSource = '../../templates/views/';
+    let textSource = '../../templates/views/';
+    let amountMinMax, datetime = '';
 
-        const targetParticipant = targetEvent.participants.find(participant => participant.id === participantid);
-        if(typeof targetParticipant === 'undefined') 
-            return callback('Participant not in this event.');
-
-        sendParticipantMail(targetEvent, targetParticipant);
-        callback();
-    })
-}
-
-function createMailBody({
-    language, 
-    amount, 
-    eventid,
-    eventname,
-    eventdatetime,
-    custommessage,
-    eventlocation
-}, {
-    id,
-    name,
-    surname,
-    email,
-    friendid
-    // friendname,
-    // friendsurname
-}, callback) {
-
-    let source = '../../templates/views/';
-    let amountMinMax = '';
-
-    switch(language) {
+    switch(event.language) {
         case 'es':
-            source = source + 'esp.html';
-            if(amount.min !== '' || amount.max !== '') {
+            htmlSource = htmlSource + 'esp.html';
+            textSource = textSource + 'esp.txt';
+            if(event.amount.min !== '' || event.amount.max !== '') {
                 amountMinMax = 'Monto sugerido '
-                if(amount.min !== '' && amount.max !== '')
-                    amountMinMax += 'entre ' + amount.min + ' y ' + amount.max
+                if(event.amount.min !== '' && event.amount.max !== '')
+                    amountMinMax += 'entre ' + event.amount.min + ' y ' + event.amount.max
                 else {
-                    amountMinMax += amount.min
-                    amountMinMax += amount.max
+                    amountMinMax += event.amount.min
+                    amountMinMax += event.amount.max
                 }
             }
-            if(eventdatetime !== '')
-                eventdatetime = 'Fecha y hora: ' + eventdatetime
+            if(event.datetime !== '')
+                datetime = 'Fecha y hora: ' + event.datetime
             break;
         case 'en':
-            source = source + 'eng.html';
-            if(amount.min !== '' || amount.max !== '') {
+            htmlSource = htmlSource + 'eng.html';
+            textSource = textSource + 'eng.txt';
+            if(event.amount.min !== '' || event.amount.max !== '') {
                 amountMinMax = 'Suggested amount '
-                if(amount.min !== '' && amount.max !== '')
-                    amountMinMax += 'between ' + amount.min + ' and ' + amount.max
+                if(event.amount.min !== '' && event.amount.max !== '')
+                    amountMinMax += 'between ' + event.amount.min + ' and ' + event.amount.max
                 else {
-                    amountMinMax += amount.min
-                    amountMinMax += amount.max
+                    amountMinMax += event.amount.min
+                    amountMinMax += event.amount.max
                 }
             }
-            if(eventdatetime !== '')
-                eventdatetime = 'Date time: ' + eventdatetime
+            if(event.datetime !== '')
+                datetime = 'Date time: ' + event.datetime
             break;
         default:
-            source = source + 'esp.html';
+            htmlSource = htmlSource + 'esp.html';
+            textSource = textSource + 'esp.txt';
     }
 
-    findParticipant(eventid, friendid, (error, friend) => {
-        if(error) return callback(null)
+    const friend = event.participants.find(part => part.id === participant.friendid)
 
-        else {
-            file = fs.readFile(path.join(__dirname, source), (err, data) => {
-                if(err) return callback(null);
-        
-                var template = Handlebars.compile(data.toString());
-                var data = {
-                    "eventname": eventname,
-                    "eventdatetime": eventdatetime,
-                    "eventid": eventid,
-                    "toid": id,
-                    "toname": name,
-                    "tosurname": surname,
-                    "toemail": email,
-                    "friendname": friend.name,
-                    "friendsurname": friend.surname,
-                    "amountMinMax": amountMinMax,
-                    "custommessage": custommessage,
-                    "eventlocation": eventlocation,
-                    "serverurl": process.env.SERVER_URL
-                }
-                return callback(template(data));
-            })
-        }
+    mergeDocument(htmlSource, event, participant, friend, amountMinMax, datetime, (htmlData) => {
+        mergeDocument(textSource, event, participant, friend, amountMinMax, datetime, (textData) => {
+            return callback(htmlData, textData)
+        })
     })
 }
 
-function deleteEvent(eventid, callback) {
+function mergeDocument(source, event, participant, friend, amountMinMax, datetime, callback) {
 
-    deleteEventSoft(eventid, (err) => {
+    file = fs.readFile(path.join(__dirname, source), (err, data) => {
+        if(err) {
+            console.error(err)
+            return
+        }
+
+        var template = Handlebars.compile(data.toString())
+
+        var data = {
+            "eventname": event.name,
+            "datetime": datetime,
+            "eventid": event.id,
+            "toid": participant.id,
+            "toname": participant.name,
+            "tosurname": participant.surname,
+            "toemail": participant.email,
+            "friendname": friend.name,
+            "friendsurname": friend.surname,
+            "amountMinMax": amountMinMax,
+            "custommessage": event.custommessage,
+            "location": event.location,
+            "serverurl": process.env.SERVER_URL,
+            "confVisible": 'none', //TODO REFINE THIS LOGIC
+            "appstorelink": process.env.APP_STORE_LINK,
+        }
+        return callback(template(data))
+    })
+}
+
+function deleteEvent(id, callback) {
+
+    deleteEventSoft(id, (err) => {
         if(err) return callback(err);
         callback();
     });
@@ -216,7 +206,6 @@ function deleteEvent(eventid, callback) {
 module.exports = {
     eventGateway,
     unsubscribeParticipant,
-    resendMessage,
     confirmParticipant,
     viewParticipantStatus,
     deleteEvent,

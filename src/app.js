@@ -1,11 +1,9 @@
-const MongoClient = require('mongodb').MongoClient;
 const express = require('express');
 const path = require('path');
 const { validationResult, check } =  require('express-validator');
 const {
     eventGateway,
     unsubscribeParticipant,
-    resendMessage,
     confirmParticipant,
     viewParticipantStatus,
     deleteEvent,
@@ -17,16 +15,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const publicDirectoryPath = path.join(__dirname, '../public');
 
-let db;
-
-MongoClient.connect(process.env.DB_URI, { 
-    useNewUrlParser:true,
-    useUnifiedTopology: true,
-    poolSize: 10
-}).then(client => {
-    db = client.db(process.env.DB_NAME);
-    setDB(db);
-}).catch(error => console.log(error));
+setDB()
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -86,16 +75,16 @@ app.get('/api/results/:eventid', authenticateToken, (req, res) => {
 })
 
 app.post('/api/results', [
-    check("eventid", "Event id must be a valid UUID value").isUUID(),
-    check("eventname", "Event Name is a required field").notEmpty(),
-    // check("eventdatetime", "Event date time is a required field").notEmpty(),
+    check("id", "Event id must be a valid UUID value").isUUID(),
+    check("name", "Event Name is a required field").notEmpty(),
     check("language", "Language required field").notEmpty(),
+    check("sendemails", "'sendemails' flag is required").notEmpty(),
     check("participants.*.id", "Participant id must be a valid UUID value").isUUID(),
     check("participants.*.name", "Participant name is a required field").notEmpty(),
     check("participants.*.email", "Participant email is a required field").notEmpty(),
+    check("participants.*.sendemail", "'sendemail' flag is required").notEmpty(),
     check("participants.*.friendid", "Participant friendid is a required field").notEmpty(),
     ], authenticateToken, (req, res) => {
-    // if(!req.body) return res.status(404).end();
     const errors = validationResult(req);
     if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
@@ -104,21 +93,6 @@ app.post('/api/results', [
 
         res.sendStatus(200);
     })
-})
-
-app.post('/api/results/resend', [
-    check("eventid", "Event id must be a valid UUID value").isUUID(),
-    check("participantid", "Participant id must be a valid UUID value").isUUID(),
-], authenticateToken, (req, res) => {
-    const errors = validationResult(req);
-    if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
-    resendMessage(req.body, err => {
-        if(err) return res.status(404).json({errors: err});
-
-        res.sendStatus(200);
-    })
-
 })
 
 app.delete('/api/events/:eventid', authenticateToken, (req, res) => {
