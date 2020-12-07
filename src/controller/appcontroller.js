@@ -118,38 +118,40 @@ function createMailBody(event, participant, callback) {
 
     let htmlSource = '../../templates/views/';
     let textSource = '../../templates/views/';
-    let amountMinMax, datetime = '';
+    let amountTxt, datetime = '';
 
     switch(event.language) {
         case 'es':
             htmlSource = htmlSource + 'esp.html';
             textSource = textSource + 'esp.txt';
-            if(event.amount.min !== '' || event.amount.max !== '') {
-                amountMinMax = 'Monto sugerido '
-                if(event.amount.min !== '' && event.amount.max !== '')
-                    amountMinMax += 'entre ' + event.amount.min + ' y ' + event.amount.max
-                else {
-                    amountMinMax += event.amount.min
-                    amountMinMax += event.amount.max
-                }
+            let precioTxt = 'El precio sugerido del regalo es ';
+            if(event.amount.min !== '' && event.amount.max === '') {
+                amountTxt = precioTxt + 'mínimo de ' + event.amount.min
+            }
+            if(event.amount.min === '' && event.amount.max !== '') {
+                amountTxt = precioTxt + 'máximo de ' + event.amount.max
+            }
+            if(event.amount.min !== '' && event.amount.max !== '') {
+                amountTxt = precioTxt + 'entre ' + event.amount.min + ' y ' + event.amount.max
             }
             if(event.datetime !== '')
-                datetime = 'Fecha y hora: ' + event.datetime
+                datetime = 'el ' + event.datetime
             break;
         case 'en':
             htmlSource = htmlSource + 'eng.html';
             textSource = textSource + 'eng.txt';
-            if(event.amount.min !== '' || event.amount.max !== '') {
-                amountMinMax = 'Suggested amount '
-                if(event.amount.min !== '' && event.amount.max !== '')
-                    amountMinMax += 'between ' + event.amount.min + ' and ' + event.amount.max
-                else {
-                    amountMinMax += event.amount.min
-                    amountMinMax += event.amount.max
-                }
+            let priceTxt = 'The suggested gift price is ';
+            if(event.amount.min !== '' && event.amount.max === '') {
+                amountTxt = priceTxt + 'minimum ' + event.amount.min
+            }
+            if(event.amount.min === '' && event.amount.max !== '') {
+                amountTxt = priceTxt + 'maximum ' + event.amount.max
+            }
+            if(event.amount.min !== '' && event.amount.max !== '') {
+                amountTxt = priceTxt + 'between ' + event.amount.min + ' and ' + event.amount.max
             }
             if(event.datetime !== '')
-                datetime = 'Date time: ' + event.datetime
+                datetime = 'on ' + event.datetime
             break;
         default:
             htmlSource = htmlSource + 'esp.html';

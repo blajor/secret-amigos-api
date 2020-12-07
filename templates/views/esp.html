@@ -1,22 +1,25 @@
 <p>Hola {{toname}}!</p>
 
-<p>Evento: {{eventname}}</p>
-<p>{{datetime}}</p>
-<p>{{amountMinMax}}</p>
-<p>{{location}}</p>
+<p>Fuiste invitado al evento {{eventname}} {{datetime}}.</p>
 
-<p>Nombre amigo: {{friendname}} {{friendsurname}}</p>
-<img src="https://secret-amigos-api.herokuapp.com/images/image_from_ios.png" height="42" width="42" style="vertical-align: middle" alt="logo">
+<p>Ubicación: {{location}}</p>
 
-<p>{{custommessage}}</p>
+<p>En el sorteo te toco comprar regalo para <strong>{{friendname}} {{friendsurname}}</strong>.<br>{{amountTxt}}</p>
+
+<p>Nota: {{custommessage}}</p>
 
 <div style="display:{{confVisible}};">
-<a href="{{serverurl}}/confirm?eventid={{eventid}}&participantid={{toid}}">Confirma tu participación!!</a>
+Confirma tu participación con un click <a href="{{serverurl}}/confirm?eventid={{eventid}}&participantid={{toid}}">aquí!</a>
 </div>
 
-<p style="color: grey; font-size:small;">Este mensaje te fue enviado a solicitud del organizador de este evento. Si no estas interesado en participar de este evento haz click <a href="{{serverurl}}/unsubscribe?eventid={{eventid}}&participantid={{toid}}" style="font-style: italic;">aqui</a>.</p>
+<p>Disfruta del evento!,</p>
 
+<p><img src="https://secretamigoapp.com/images/logos/SecretAmigo_App_Icon.png" height="42" width="42" style="vertical-align: middle" alt="logo"> Secret Amigo
+    <br><a href="https://secretamigoapp.com">secretamigoapp.com</a>
+</p>
 <a href="https://www.apple.com/app-store/">
-    <img src="https://secret-amigos-api.herokuapp.com/images/App_Store_Icon.png" height="42" style="vertical-align: middle" alt="Apple_Store">
+    <img src="https://secretamigoapp.com/images/logos/App_Store_Black_Badge.png" height="42" style="vertical-align: middle" alt="Apple_Store">
 </a>
 
+<p style="color: grey; font-size:small;">Este mensaje te fue enviado a solicitud del organizador de este evento.
+    Si no estas interesado en participar de este evento haz click <a href="{{serverurl}}/unsubscribe?eventid={{eventid}}&participantid={{toid}}" style="font-style: italic;">aquí</a>.</p>
