@@ -24,18 +24,18 @@ function eventGateway(event, callback) {
         return callback('Unable to send < 3 participants. Please review and retry.');
 
     if(event.sendemails) {
-        saveEvent(event, event.participants)
+        saveEvent(event)
         event.participants.forEach(participant => sendParticipantMail(event, participant))
         callback()
     }
     else {
         event.participants.forEach(participant => {
             if(participant.sendemail) {
-                saveEvent(event, [participant])
+                saveEvent(event)
                 sendParticipantMail(event, participant)
             }
             else
-                saveEvent(event, [])
+                saveEvent(event)
         })
         callback()
     }
@@ -160,14 +160,14 @@ function createMailBody(event, participant, callback) {
 
     let friend = event.participants.find(part => part.id == participant.friendid)
 
-    mergeDocument(htmlSource, event, participant, friend, amountMinMax, datetime, (htmlData) => {
-        mergeDocument(textSource, event, participant, friend, amountMinMax, datetime, (textData) => {
+    mergeDocument(htmlSource, event, participant, friend, amountTxt, datetime, (htmlData) => {
+        mergeDocument(textSource, event, participant, friend, amountTxt, datetime, (textData) => {
             return callback(htmlData, textData)
         })
     })
 }
 
-function mergeDocument(source, event, participant, friend, amountMinMax, datetime, callback) {
+function mergeDocument(source, event, participant, friend, amountTxt, datetime, callback) {
 
     file = fs.readFile(path.join(__dirname, source), (err, data) => {
         if(err) {
@@ -187,12 +187,11 @@ function mergeDocument(source, event, participant, friend, amountMinMax, datetim
             "toemail": participant.email,
             "friendname": friend.name,
             "friendsurname": friend.surname,
-            "amountMinMax": amountMinMax,
+            "amountTxt": amountTxt,
             "custommessage": event.custommessage,
             "location": event.location,
             "serverurl": process.env.SERVER_URL,
             "confVisible": participant.confirmed ? 'none' : 'initial', //TODO REFINE THIS LOGIC
-            "appstorelink": process.env.APP_STORE_LINK,
         }
         return callback(template(data))
     })
