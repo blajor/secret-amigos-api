@@ -51,15 +51,16 @@ app.get('/confirm', [
         if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
         const { eventid, participantid } = req.query;
-        confirmParticipant(eventid, participantid, (err) => {
+        confirmParticipant(eventid, participantid, (err, response) => {
             if(err) 
                 return res.json({ error: err });
 
-            res.json({ 
-                message: 'You have been confirmed!!',
-                eventid,
-                participantid
-            });
+            // res.json({ 
+            //     message: 'You have been confirmed!!',
+            //     eventid,
+            //     participantid
+            // });
+            res.send(response)
         });
     }
 )
@@ -104,6 +105,10 @@ app.delete('/api/events/:eventid', authenticateToken, (req, res) => {
         res.send(result);
     })
 })
+
+app.use(function (req, res, next) {
+    res.status(404).send("Sorry can't find that!")
+  })
 
 app.listen(port, () => {
     console.log('Server is up on port ' + port);

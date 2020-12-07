@@ -70,9 +70,15 @@ function sendParticipantMail(event, participant) {
 };
 
 function confirmParticipant(eventid, participantid, callback) {
-    confParticipant(eventid, participantid, (err) => {
+    confParticipant(eventid, participantid, (err, event) => {
         if(err) return callback(err);
-        callback();
+
+        const source = '../../templates/views/confirmed.html'
+        const participant = event.participants.find(part => part.id === participantid)
+
+        mergeDocument(source, event, participant, '', '', '', response => {
+            callback(undefined, response);
+        })
     });
 };
 
@@ -167,7 +173,7 @@ function createMailBody(event, participant, callback) {
     })
 }
 
-function mergeDocument(source, event, participant, friend, amountTxt, datetime, callback) {
+function mergeDocument(source, event, participant, friend = { name: '', surname: ''}, amountTxt = '', datetime = '', callback) {
 
     file = fs.readFile(path.join(__dirname, source), (err, data) => {
         if(err) {

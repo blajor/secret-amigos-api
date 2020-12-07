@@ -147,8 +147,13 @@ function confParticipant(eventid, participantid, callback) {
     {
         $set: { "participants.$.confirmed": true }
     }).then((result) => {
-        if(result.matchedCount === 1) return callback();
-        callback('Participant does not belong to this event.');
+        if(result.matchedCount === 1) {
+            findEvent(eventid, (err, event) => {
+                return callback(undefined, event);
+            })
+        } else {
+            callback('Participant does not belong to this event.');
+        }
     }).catch((error) => {
         callback(error);
     });
