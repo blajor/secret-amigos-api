@@ -1,23 +1,25 @@
 <p>Hi {{toname}}!</p>
 
-<p>Event: {{eventname}}</p>
-<p>{{datetime}}</p>
-<p>{{amountMinMax}}</p>
-<p>{{location}}</p>
+<p>You have been invited to the event {{eventname}} {{datetime}}.</p>
 
-<p>Secret friend: {{friendname}} {{friendsurname}}</p>
-<img src="https://secret-amigos-api.herokuapp.com/images/image_from_ios.png" height="42" width="42" style="vertical-align: middle" alt="logo">
+<p>Location: {{location}}</p>
 
-<p>{{custommessage}}</p>
+<p>You've been picked to buy a gift for <strong>{{friendname}} {{friendsurname}}</strong>.<br>{{amountTxt}}</p>
+
+<p>Note: {{custommessage}}</p>
 
 <div style="display:{{confVisible}};">
-Confirm your participation <a href="{{serverurl}}/confirm?eventid={{eventid}}&participantid={{toid}}">here!</a>
+Confirm your participation by clicking <a href="{{serverurl}}/confirm?eventid={{eventid}}&participantid={{toid}}">here!</a>
 </div>
+
+<p>Enjoy the event!,</p>
+
+<p><img src="https://secretamigoapp.com/images/logos/SecretAmigo_App_Icon.png" height="42" width="42" style="vertical-align: middle" alt="logo"> Secret Amigo
+    <br><a href="https://secretamigoapp.com">secretamigoapp.com</a>
+</p>
+<a href="https://www.apple.com/app-store/">
+    <img src="https://secretamigoapp.com/images/logos/App_Store_Black_Badge.png" height="42" style="vertical-align: middle" alt="Apple_Store">
+</a>
 
 <p style="color: grey; font-size:small;">This message is sent to you because your email address was provided by the event organizer. 
     If you are not interested in participating in this event, just hit <a href="{{serverurl}}/unsubscribe?eventid={{eventid}}&participantid={{toid}}" style="font-style: italic;">Unsubscribe</a>.</p>
-
-    <a href="https://www.apple.com/app-store/">
-        <img src="https://secret-amigos-api.herokuapp.com/images/App_Store_Icon.png" height="42" style="vertical-align: middle" alt="Apple_Store">
-    </a>
-        
