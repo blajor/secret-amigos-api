@@ -24,23 +24,25 @@ function eventGateway(event, callback) {
         return callback('Unable to send < 3 participants. Please review and retry.');
 
     if(event.sendemails) {
-        console.log("mails para todos..!!") //TODO ERASE
+        saveEvent(event, event.participants)
         event.participants.forEach(participant => sendParticipantMail(event, participant))
+        callback()
     }
     else {
         event.participants.forEach(participant => {
-            console.log('mails selectivos...') //TODO ERASE
-            if(participant.sendemail) sendParticipantMail(event, participant)
+            if(participant.sendemail) {
+                saveEvent(event, [participant])
+                sendParticipantMail(event, participant)
+            }
+            else
+                saveEvent(event, [])
         })
+        callback()
     }
-
-    saveEvent(event)
-    callback()
 };
 
 function sendParticipantMail(event, participant) {
 
-    console.log(`mail para ${participant.name}`) //TODO ERASE
     var mailOptions = {
         to: `${participant.name} ${participant.surname} <${participant.email}>`,
         subject: event.name,
@@ -63,7 +65,6 @@ function sendParticipantMail(event, participant) {
 
         sendMail(mailOptions, error => {
             mailSent(event.id, participant.id, error)
-            console.error(participant.name, " ==> ", error) //TODO ERASE
         })
     })
 };
@@ -155,7 +156,7 @@ function createMailBody(event, participant, callback) {
             textSource = textSource + 'esp.txt';
     }
 
-    const friend = event.participants.find(part => part.id === participant.friendid)
+    let friend = event.participants.find(part => part.id == participant.friendid)
 
     mergeDocument(htmlSource, event, participant, friend, amountMinMax, datetime, (htmlData) => {
         mergeDocument(textSource, event, participant, friend, amountMinMax, datetime, (textData) => {
@@ -188,7 +189,7 @@ function mergeDocument(source, event, participant, friend, amountMinMax, datetim
             "custommessage": event.custommessage,
             "location": event.location,
             "serverurl": process.env.SERVER_URL,
-            "confVisible": 'none', //TODO REFINE THIS LOGIC
+            "confVisible": participant.confirmed ? 'none' : 'initial', //TODO REFINE THIS LOGIC
             "appstorelink": process.env.APP_STORE_LINK,
         }
         return callback(template(data))

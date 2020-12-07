@@ -13,30 +13,105 @@ function setDBConnection() {
     }).catch(error => console.log(error));
 }
 
-function prepareEvent(event) {
-    for(let i = 0; i < event.participants.length; i++) {
-        event.participants[i].confirmed = undefined;
-        event.participants[i].unsubscribed = undefined;
-        event.participants[i].emailSent = undefined;
-    }
-    event.active = undefined;
-    event.deleted = false;
-    return event;
+// function prepareEvent(event) {
+
+    // console.log('--------------------------------')
+    // console.log(event.participants)
+
+    // targetParticipants.forEach(target => {
+    //     event.participants.find(part => {
+    //         if(part.id === target.id) {
+    //             part.confirmed = undefined
+    //             part.unsubscribed = undefined
+    //             part.emailSent = undefined
+    //         }
+    //     })
+    // });
+
+    // console.log('--------------------------------')
+    // console.log(event.participants)
+
+    // event.participants.forEach(part => {
+    //     if(!part.confirmed) part.confirmed = undefined
+    //     if(!part.unsubscribed) part.unsubscribed = undefined
+    //     if(!part.emailSent) part.emailSent = undefined
+    // })
+
+    // console.log('--------------------------------')
+    // console.log(event.participants)
+
+//     for(let i = 0; i < event.participants.length; i++) {
+//         event.participants[i].confirmed = undefined;
+//         event.participants[i].unsubscribed = undefined;
+//         event.participants[i].emailSent = undefined;
+//     }
+//     event.active = undefined;
+//     event.deleted = false;
+//     return event;
+// }
+
+function prepareEvent(newEvent, callback) {
+    
+    findEvent(newEvent.id, (error, oldEvent) => {
+        if(error) {
+
+            newEvent.participants.forEach(part => {
+                part.confirmed = undefined
+                part.unsubscribed = undefined
+                part.emailSent = undefined
+            })
+            newEvent.active = undefined;
+            newEvent.deleted = false;
+            return callback(newEvent);
+        
+        } else {
+
+            oldEvent.amount = newEvent.amount
+            oldEvent.custommessage = newEvent.custommessage
+            oldEvent.datetime = newEvent.datetime
+            oldEvent.language = newEvent.language
+            oldEvent.location = newEvent.location
+            oldEvent.name = newEvent.name
+            oldEvent.sendemails = newEvent.sendemails
+    
+            newEvent.participants.forEach(part => {
+                let oPart = oldEvent.participants.find(oopart => oopart.id === part.id)
+                if(typeof oPart === 'undefined') {
+                    part.confirmed = undefined
+                    part.unsubscribed = undefined
+                    part.emailSent = undefined
+                    // oldEvent.participants.push(part)
+                } else {
+                    part.confirmed = oPart.confirmed
+                    part.unsubscribed = oPart.unsubscribed
+                    part.emailSent = oPart.emailSent
+                    part.emailerror = oPart.emailerror
+                }
+            })
+    
+            oldEvent.participants = newEvent.participants
+            
+            return callback(oldEvent)
+        }
+    })
 }
 
 function saveEvent(event) {
 
     const collection = db.collection('events');
 
-    const preparedEvent = prepareEvent(event);
-    preparedEvent.active = true;
+    prepareEvent(event, preparedEvent => {
 
-    collection.updateOne({id: preparedEvent.id}, { $set: preparedEvent }, {upsert: true})
-    .then((updatedEvent) => {
+        preparedEvent.active = true;
+
+        collection.updateOne({id: preparedEvent.id}, { $set: preparedEvent }, {upsert: true})
+        .then((updatedEvent) => {
+        })
+        .catch((error) => {
+            console.error(error) //TODO CONSOLE LOG OK
+        });
+    
     })
-    .catch((error) => {
-        console.error(error) //TODO CONSOLE LOG OK
-    });
 
     return
 }
