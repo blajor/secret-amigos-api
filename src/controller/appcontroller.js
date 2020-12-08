@@ -69,11 +69,11 @@ function sendParticipantMail(event, participant) {
     })
 };
 
-function confirmParticipant(eventid, participantid, callback) {
+function confirmParticipant(eventid, participantid, language, callback) {
     confParticipant(eventid, participantid, (err, event) => {
         if(err) return callback(err);
 
-        const source = '../../templates/views/confirmed.html'
+        const source = `../../templates/views/conf_${language}.html`
         const participant = event.participants.find(part => part.id === participantid)
 
         mergeDocument(source, event, participant, '', '', response => {

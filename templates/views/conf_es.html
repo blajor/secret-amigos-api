@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
  
      <!-- Site Metas -->
-    <title>Secret Amigo</title>  
+    <title>Secret Amigo - Confirmacion</title>  
     <meta name="keywords" content="">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -56,11 +56,12 @@
                     </button>
                     <div class="collapse navbar-collapse justify-content-end" id="navbarApp">
                         <ul class="navbar-nav">
-                            <li><a class="nav-link active" href="https://secretamigoapp.com#home">Home</a></li>
+                            <li><a class="nav-link" href="https://secretamigoapp.com#home">Home</a></li>
                             <li><a class="nav-link" href="https://secretamigoapp.com#features">Features</a></li>
                             <li><a class="nav-link" href="https://secretamigoapp.com#team">Team</a></li>
                             <li><a class="nav-link" href="https://secretamigoapp.com#testimonials">Users</a></li>
                             <li><a class="nav-link" href="https://secretamigoapp.com#support">Contact Us</a></li>
+                            <li><a class="nav-link" href="{{serverurl}}/en/confirm?eventid={{eventid}}&participantid={{toid}}" style="color: red;">English</a></li>
                         </ul>
                     </div>
                 </div>
@@ -72,13 +73,13 @@
                 <div class="row">
                     <div class="col-md-12 col-sm-12">
                         <div class="big-tagline">
-                            <h2>Hi {{toname}}!</h2>
-                            <p class="lead">You have been confirmed to the event {{eventname}} {{datetime}}<br>
-                                Location: {{location}}<br>
-                                You've been picked to buy a gift for <strong>{{friendname}} {{friendsurname}}</strong><br>
+                            <h2>Hola {{toname}} {{tosurname}}!</h2>
+                            <p class="lead">Has confirmado tu participación para el evento <u>{{eventname}}</u> {{datetime}}<br>
+                                Ubicación: {{location}}<br>
+                                En el sorteo te tocó comprar regalo para <strong>{{friendname}} {{friendsurname}}</strong><br>
                                 {{amountTxt}}<br>
                                 {{custommessage}}<br>
-                                Enjoy the event!</p>
+                                Disfruta del Evento!</p>
                             <a data-scroll href="#screenshots" class="btn btn-light btn-radius btn-brd"><i class="fa fa-apple" aria-hidden="true"></i> App Store</a>
                         </div>
                     </div>
