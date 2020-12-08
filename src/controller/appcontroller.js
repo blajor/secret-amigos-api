@@ -76,7 +76,7 @@ function confirmParticipant(eventid, participantid, callback) {
         const source = '../../templates/views/confirmed.html'
         const participant = event.participants.find(part => part.id === participantid)
 
-        mergeDocument(source, event, participant, '', '', '', response => {
+        mergeDocument(source, event, participant, '', '', response => {
             callback(undefined, response);
         })
     });
@@ -164,22 +164,22 @@ function createMailBody(event, participant, callback) {
             textSource = textSource + 'esp.txt';
     }
 
-    let friend = event.participants.find(part => part.id == participant.friendid)
-
-    mergeDocument(htmlSource, event, participant, friend, amountTxt, datetime, (htmlData) => {
-        mergeDocument(textSource, event, participant, friend, amountTxt, datetime, (textData) => {
+    mergeDocument(htmlSource, event, participant, amountTxt, datetime, (htmlData) => {
+        mergeDocument(textSource, event, participant, amountTxt, datetime, (textData) => {
             return callback(htmlData, textData)
         })
     })
 }
 
-function mergeDocument(source, event, participant, friend = { name: '', surname: ''}, amountTxt = '', datetime = '', callback) {
+function mergeDocument(source, event, participant, amountTxt = '', datetime = '', callback) {
 
     file = fs.readFile(path.join(__dirname, source), (err, data) => {
         if(err) {
             console.error(err)
             return
         }
+
+        let friend = event.participants.find(part => part.id == participant.friendid)
 
         var template = Handlebars.compile(data.toString())
 
