@@ -186,7 +186,7 @@ function createMailBody(event, participant, callback) {
 
 function mergeDocument(source, event, participant, language, callback) {
 
-    let amountTxt, datetime = '';
+    let amountTxt, datetime, location = '';
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
     switch(language) {
@@ -203,6 +203,9 @@ function mergeDocument(source, event, participant, language, callback) {
                 var date = new Date(event.datetime)
                 datetime = 'el ' + date.toLocaleDateString("es-MX", options)
             }
+            if(event.location !== '') {
+                location = 'Ubicación: ' + event.location
+            }
         break;
         case "en":
             let priceTxt = 'The suggested gift price is ';
@@ -216,7 +219,9 @@ function mergeDocument(source, event, participant, language, callback) {
             if(event.datetime !== '') {
                 var date = new Date(event.datetime)
                 datetime = 'on ' + date.toLocaleDateString("en-US", options)
-                console.log(datetime)
+            }
+            if(event.location !== '') {
+                location = 'Location: ' + event.location
             }
         break;
     }
@@ -244,7 +249,7 @@ function mergeDocument(source, event, participant, language, callback) {
             "friendsurname": friend.surname,
             "amountTxt": amountTxt,
             "custommessage": event.custommessage,
-            "location": event.location,
+            "location": location,
             "serverurl": process.env.SERVER_URL,
             "token": token,
         }
