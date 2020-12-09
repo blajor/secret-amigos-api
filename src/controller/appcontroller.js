@@ -2,6 +2,8 @@ const path = require('path');
 const Handlebars = require('handlebars');
 const fs = require('fs');
 const { sendMail } = require('../../utils/mailer');
+const { getIcalObjectInstance } = require('../../utils/ical');
+const { generateToken } = require('../../utils/authenticator')
 const { 
     saveEvent,
     unsubsParticipant,
@@ -10,9 +12,7 @@ const {
     findEvent,
     deleteEventSoft,
     confParticipant,
-    findParticipant,
 } = require('../../utils/dbmanager');
-const { getIcalObjectInstance } = require('../../utils/ical');
 
 function setDB() {
     setDBConnection();
@@ -46,7 +46,6 @@ function sendParticipantMail(event, participant) {
     var mailOptions = {
         to: `${participant.name} ${participant.surname} <${participant.email}>`,
         subject: event.name,
-        // text: `Secret Amigo dice hola ${participant.name}`,
         attachments: []
     }
 
@@ -62,19 +61,18 @@ function sendParticipantMail(event, participant) {
     createMailBody(event, participant, (html, text) => {
         mailOptions.html = html
         mailOptions.text = text
-
         sendMail(mailOptions, error => {
             mailSent(event.id, participant.id, error)
         })
     })
 };
 
-function confirmParticipant(eventid, participantid, language, callback) {
-    confParticipant(eventid, participantid, (err, event) => {
+function confirmParticipant(queryObject, language, callback) {
+    confParticipant(queryObject, (err, event) => {
         if(err) return callback(err);
 
         const source = `../../templates/views/conf_${language}.html`
-        const participant = event.participants.find(part => part.id === participantid)
+        const participant = event.participants.find(part => part.id === queryObject.participantid)
 
         mergeDocument(source, event, participant, '', '', response => {
             callback(undefined, response);
@@ -82,10 +80,17 @@ function confirmParticipant(eventid, participantid, language, callback) {
     });
 };
 
-function unsubscribeParticipant(eventid, participantid, callback) {
-    unsubsParticipant(eventid, participantid, (err) => {
-        if(err) return callback(err);
-        callback();
+function unsubscribeParticipant(queryObject, language, callback) {
+    unsubsParticipant(queryObject, (err, event) => {
+        if(err)
+            return callback(err);
+
+        const source = `../../templates/views/unsub_${language}.html`
+        const participant = event.participants.find(part => part.id === queryObject.participantid)
+
+        mergeDocument(source, event, participant, '', '', response => {
+            callback(undefined, response);
+        })
     });
 };
 
@@ -99,16 +104,20 @@ function viewParticipantStatus(eventid, callback) {
         let invitationconfirmed = [];
         let participantunsubscribed = [];
 
-        for(const participant of targetEvent.participants) {
-            if(participant.confirmed) invitationconfirmed.push(participant.id);
-            if(participant.unsubscribed) participantunsubscribed.push(participant.id);
-            if(participant.emailSent)
-                mailaccepted.push(participant.id)
-            else if (participant.emailSent === false)
-                mailrejected.push(participant.id);
-            else
-                mailpending.push(participant.id);
-        }
+        targetEvent.participants.forEach(part => {
+            switch(part.status) {
+                case 'pending': mailpending.push(part.id)
+                    break;
+                case 'accepted': mailaccepted.push(part.id)
+                    break;
+                case 'rejected': mailrejected.push(part.id)
+                    break;
+                case 'confirmed': invitationconfirmed.push(part.id)
+                    break;
+                case 'unsubscribed': participantunsubscribed.push(part.id)
+                    break;
+            }
+        })
 
         callback(undefined, {
             mailaccepted,
@@ -125,6 +134,7 @@ function createMailBody(event, participant, callback) {
     let htmlSource = '../../templates/views/';
     let textSource = '../../templates/views/';
     let amountTxt, datetime = '';
+    let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
     switch(event.language) {
         case 'es':
@@ -141,8 +151,9 @@ function createMailBody(event, participant, callback) {
                 amountTxt = precioTxt + 'entre ' + event.amount.min + ' y ' + event.amount.max
             }
             if(event.datetime !== '')
-                datetime = 'el ' + event.datetime
-            break;
+            var date = new Date(event.datetime)
+            datetime = 'el ' + date.toLocaleDateString("es-MX", options)
+        break;
         case 'en':
             htmlSource = htmlSource + 'eng.html';
             textSource = textSource + 'eng.txt';
@@ -157,7 +168,8 @@ function createMailBody(event, participant, callback) {
                 amountTxt = priceTxt + 'between ' + event.amount.min + ' and ' + event.amount.max
             }
             if(event.datetime !== '')
-                datetime = 'on ' + event.datetime
+                var date = new Date(event.datetime)
+                datetime = 'on ' + date.toLocaleDateString("en-US", options)
             break;
         default:
             htmlSource = htmlSource + 'esp.html';
@@ -180,6 +192,7 @@ function mergeDocument(source, event, participant, amountTxt = '', datetime = ''
         }
 
         let friend = event.participants.find(part => part.id == participant.friendid)
+        const token = generateToken(event.id, participant.id, participant.email)
 
         var template = Handlebars.compile(data.toString())
 
@@ -197,7 +210,7 @@ function mergeDocument(source, event, participant, amountTxt = '', datetime = ''
             "custommessage": event.custommessage,
             "location": event.location,
             "serverurl": process.env.SERVER_URL,
-            "confVisible": participant.confirmed ? 'none' : 'initial', //TODO REFINE THIS LOGIC
+            "token": token,
         }
         return callback(template(data))
     })

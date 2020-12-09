@@ -9,7 +9,7 @@ const {
     deleteEvent,
     setDB,
 } = require('./controller/appcontroller');
-const { authenticateToken } = require('../utils/authenticator');
+const { authenticateToken, getQueryData } = require('../utils/authenticator');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,70 +22,59 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(publicDirectoryPath));
 
-app.get('/unsubscribe', [
-    check("eventid", "eventid").isUUID(),
-    check("participantid", "participantid").isUUID()
-    ], (req, res) => {
-        const errors = validationResult(req);
-        if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+app.get('/en/unsubscribe/:queryToken', (req, res) => {
+    getQueryData(req.params.queryToken, (err, queryObject) => {
+        if(err) return res.json({ error: err})
 
-        const { eventid, participantid } = req.query;
-        unsubscribeParticipant(eventid, participantid, (err) => {
+        unsubscribeParticipant(queryObject, 'en', (err, response) => {
+            if(err)
+                return res.json({ error: err })
+
+            res.send(response)
+        })
+    })
+})
+
+app.get('/es/unsubscribe/:queryToken', (req, res) => {
+    getQueryData(req.params.queryToken, (err, queryObject) => {
+        if(err) return res.json({ error: err})
+
+        unsubscribeParticipant(queryObject, 'es', (err, response) => {
+            if(err)
+                return res.json({ error: err })
+
+            res.send(response)
+        })
+    })
+})
+
+app.get('/en/confirm/:queryToken', (req, res) => {
+        getQueryData(req.params.queryToken, (err, queryObject) => {
+            if(err) return res.json({ error: err})
+
+        confirmParticipant(queryObject, 'en', (err, response) => {
             if(err) 
                 return res.json({ error: err });
 
-            res.json({ 
-                message: 'You have been unsubscribed',
-                eventid,
-                participantid
-            });
-        });
-    }
-)
-
-app.get('/en/confirm', [
-    check("eventid", "eventid").isUUID(),
-    check("participantid", "participantid").isUUID()
-    ], (req, res) => {
-        const errors = validationResult(req);
-        if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
-        const { eventid, participantid } = req.query;
-        confirmParticipant(eventid, participantid, 'en', (err, response) => {
-            if(err) 
-                return res.json({ error: err });
-
-            // res.json({ 
-            //     message: 'You have been confirmed!!',
-            //     eventid,
-            //     participantid
-            // });
             res.send(response)
         });
-    }
-)
 
-app.get('/es/confirm', [
-    check("eventid", "eventid").isUUID(),
-    check("participantid", "participantid").isUUID()
-    ], (req, res) => {
-        const errors = validationResult(req);
-        if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    })
+})
 
-        const { eventid, participantid } = req.query;
-        confirmParticipant(eventid, participantid, 'es', (err, response) => {
+app.get('/es/confirm/:queryToken', (req, res) => {
+    getQueryData(req.params.queryToken, (err, queryObject) => {
+        if(err) return res.json({ error: err})
+
+        confirmParticipant(queryObject, 'es', (err, response) => {
             if(err) 
                 return res.json({ error: err });
 
-            // res.json({ 
-            //     message: 'You have been confirmed!!',
-            //     eventid,
-            //     participantid
-            // });
             res.send(response)
         });
-    }
-)
+
+    })
+})
 
 app.get('/api/results/:eventid', authenticateToken, (req, res) => {
     const eventid = req.params.eventid;

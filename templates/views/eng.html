@@ -8,10 +8,12 @@
 
 <p>{{custommessage}}</p>
 
-<div style="display:{{confVisible}};">
-Confirm your participation by clicking <a href="{{serverurl}}/en/confirm?eventid={{eventid}}&participantid={{toid}}">here!</a>
-</div>
+<!-- <div style="display:{{confVisible}};">
+Confirm your participation by clicking <a href="{{serverurl}}/en/confirm/{{token}}">here!</a>
+</div> -->
 
+<p>Confirm your participation by clicking <a href="{{serverurl}}/en/confirm/{{token}}">here!</a></p>
+    
 <p>Enjoy the event!,</p>
 
 <p><img src="https://secretamigoapp.com/images/logos/SecretAmigo_App_Icon.png" height="42" width="42" style="vertical-align: middle" alt="logo"> Secret Amigo
@@ -22,4 +24,4 @@ Confirm your participation by clicking <a href="{{serverurl}}/en/confirm?eventid
 </a>
 
 <p style="color: grey; font-size:small;">This message is sent to you because your email address was provided by the event organizer. 
-    If you are not interested in participating in this event, just hit <a href="{{serverurl}}/unsubscribe?eventid={{eventid}}&participantid={{toid}}" style="font-style: italic;">Unsubscribe</a>.</p>
+    If you are not interested in participating in this event, just hit <a href="{{serverurl}}/en/unsubscribe/{{token}}" style="font-style: italic;">Unsubscribe</a>.</p>

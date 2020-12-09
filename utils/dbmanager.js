@@ -13,53 +13,12 @@ function setDBConnection() {
     }).catch(error => console.log(error));
 }
 
-// function prepareEvent(event) {
-
-    // console.log('--------------------------------')
-    // console.log(event.participants)
-
-    // targetParticipants.forEach(target => {
-    //     event.participants.find(part => {
-    //         if(part.id === target.id) {
-    //             part.confirmed = undefined
-    //             part.unsubscribed = undefined
-    //             part.emailSent = undefined
-    //         }
-    //     })
-    // });
-
-    // console.log('--------------------------------')
-    // console.log(event.participants)
-
-    // event.participants.forEach(part => {
-    //     if(!part.confirmed) part.confirmed = undefined
-    //     if(!part.unsubscribed) part.unsubscribed = undefined
-    //     if(!part.emailSent) part.emailSent = undefined
-    // })
-
-    // console.log('--------------------------------')
-    // console.log(event.participants)
-
-//     for(let i = 0; i < event.participants.length; i++) {
-//         event.participants[i].confirmed = undefined;
-//         event.participants[i].unsubscribed = undefined;
-//         event.participants[i].emailSent = undefined;
-//     }
-//     event.active = undefined;
-//     event.deleted = false;
-//     return event;
-// }
-
 function prepareEvent(newEvent, callback) {
     
     findEvent(newEvent.id, (error, oldEvent) => {
         if(error) {
 
-            newEvent.participants.forEach(part => {
-                part.confirmed = undefined
-                part.unsubscribed = undefined
-                part.emailSent = undefined
-            })
+            newEvent.participants.forEach(part => part.status = 'pending')
             newEvent.active = undefined;
             newEvent.deleted = false;
             return callback(newEvent);
@@ -77,14 +36,9 @@ function prepareEvent(newEvent, callback) {
             newEvent.participants.forEach(part => {
                 let oPart = oldEvent.participants.find(oopart => oopart.id === part.id)
                 if(typeof oPart === 'undefined') {
-                    part.confirmed = undefined
-                    part.unsubscribed = undefined
-                    part.emailSent = undefined
-                    // oldEvent.participants.push(part)
+                    part.status = 'pending'
                 } else {
-                    part.confirmed = oPart.confirmed
-                    part.unsubscribed = oPart.unsubscribed
-                    part.emailSent = oPart.emailSent
+                    part.status = oPart.status
                     part.emailerror = oPart.emailerror
                 }
             })
@@ -101,7 +55,6 @@ function saveEvent(event) {
     const collection = db.collection('events');
 
     prepareEvent(event, preparedEvent => {
-
         preparedEvent.active = true;
 
         collection.updateOne({id: preparedEvent.id}, { $set: preparedEvent }, {upsert: true})
@@ -110,42 +63,51 @@ function saveEvent(event) {
         .catch((error) => {
             console.error(error) //TODO CONSOLE LOG OK
         });
-    
     })
-
     return
 }
 
-function unsubsParticipant(eventid, participantid, callback) {
-
+function unsubsParticipant({eventid, participantid, email}, callback) {
     const collection = db.collection('events');
 
     collection.updateOne({
         "id": eventid,
         "participants.id": participantid,
+        "participants.email": email,
         deleted: false
     },
     {
-        $set: { "participants.$.unsubscribed": true }
+        $set: { 
+            "participants.$.status": "unsubscribed",
+            "participants.$.emailerror": undefined,
+        }
     }).then((result) => {
-        if(result.matchedCount === 1) return callback();
-        callback('Participant does not belong to this event.');
+        if(result.matchedCount === 1) {
+            findEvent(eventid, (err, event) => {
+                return callback(undefined, event)
+            })
+        } else {
+            callback('Participant does not belong to this event.');
+        }
     }).catch((error) => {
         callback(error);
     });
 }
 
-function confParticipant(eventid, participantid, callback) {
-
+function confParticipant({eventid, participantid, email}, callback) {
     const collection = db.collection('events');
 
     collection.updateOne({
         "id": eventid,
         "participants.id": participantid,
+        "participants.email": email,
         deleted: false
     },
     {
-        $set: { "participants.$.confirmed": true }
+        $set: { 
+            "participants.$.status": "confirmed",
+            "participants.$.emailerror": undefined,
+        }
     }).then((result) => {
         if(result.matchedCount === 1) {
             findEvent(eventid, (err, event) => {
@@ -160,7 +122,6 @@ function confParticipant(eventid, participantid, callback) {
 }
 
 function mailSent(eventid, participantid, error) {
-
     const collection = db.collection('events');
 
     collection.updateOne({
@@ -170,7 +131,7 @@ function mailSent(eventid, participantid, error) {
     },
     {
         $set: { 
-            "participants.$.emailSent": error === false,
+            "participants.$.status": error === false ? 'accepted' : 'rejected',
             "participants.$.emailerror": error
          }
     }).then((result) => {
