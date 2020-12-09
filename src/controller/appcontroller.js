@@ -74,7 +74,7 @@ function confirmParticipant(queryObject, language, callback) {
         const source = `../../templates/views/conf_${language}.html`
         const participant = event.participants.find(part => part.id === queryObject.participantid)
 
-        mergeDocument(source, event, participant, '', '', response => {
+        mergeDocument(source, event, participant, language, response => {
             callback(undefined, response);
         })
     });
@@ -88,7 +88,7 @@ function unsubscribeParticipant(queryObject, language, callback) {
         const source = `../../templates/views/unsub_${language}.html`
         const participant = event.participants.find(part => part.id === queryObject.participantid)
 
-        mergeDocument(source, event, participant, '', '', response => {
+        mergeDocument(source, event, participant, language, response => {
             callback(undefined, response);
         })
     });
@@ -131,68 +131,104 @@ function viewParticipantStatus(eventid, callback) {
 
 function createMailBody(event, participant, callback) {
 
-    let htmlSource = '../../templates/views/';
-    let textSource = '../../templates/views/';
-    let amountTxt, datetime = '';
-    let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    let htmlSource = `../../templates/views/mail_${event.language}.html`;
+    let textSource = `../../templates/views/text_${event.language}.txt`;
 
-    switch(event.language) {
-        case 'es':
-            htmlSource = htmlSource + 'esp.html';
-            textSource = textSource + 'esp.txt';
-            let precioTxt = 'El precio sugerido del regalo es ';
-            if(event.amount.min !== '' && event.amount.max === '') {
-                amountTxt = precioTxt + 'mínimo de ' + event.amount.min
-            }
-            if(event.amount.min === '' && event.amount.max !== '') {
-                amountTxt = precioTxt + 'máximo de ' + event.amount.max
-            }
-            if(event.amount.min !== '' && event.amount.max !== '') {
-                amountTxt = precioTxt + 'entre ' + event.amount.min + ' y ' + event.amount.max
-            }
-            if(event.datetime !== '')
-            var date = new Date(event.datetime)
-            datetime = 'el ' + date.toLocaleDateString("es-MX", options)
-        break;
-        case 'en':
-            htmlSource = htmlSource + 'eng.html';
-            textSource = textSource + 'eng.txt';
-            let priceTxt = 'The suggested gift price is ';
-            if(event.amount.min !== '' && event.amount.max === '') {
-                amountTxt = priceTxt + 'minimum ' + event.amount.min
-            }
-            if(event.amount.min === '' && event.amount.max !== '') {
-                amountTxt = priceTxt + 'maximum ' + event.amount.max
-            }
-            if(event.amount.min !== '' && event.amount.max !== '') {
-                amountTxt = priceTxt + 'between ' + event.amount.min + ' and ' + event.amount.max
-            }
-            if(event.datetime !== '')
-                var date = new Date(event.datetime)
-                datetime = 'on ' + date.toLocaleDateString("en-US", options)
-            break;
-        default:
-            htmlSource = htmlSource + 'esp.html';
-            textSource = textSource + 'esp.txt';
-    }
+    // let amountTxt, datetime = '';
+    // let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
-    mergeDocument(htmlSource, event, participant, amountTxt, datetime, (htmlData) => {
-        mergeDocument(textSource, event, participant, amountTxt, datetime, (textData) => {
+    // switch(event.language) {
+    //     case 'es':
+    //         htmlSource = htmlSource + 'esp.html';
+    //         textSource = textSource + 'esp.txt';
+    //         let precioTxt = 'El precio sugerido del regalo es ';
+    //         if(event.amount.min !== '' && event.amount.max === '') {
+    //             amountTxt = precioTxt + 'mínimo de ' + event.amount.min
+    //         }
+    //         if(event.amount.min === '' && event.amount.max !== '') {
+    //             amountTxt = precioTxt + 'máximo de ' + event.amount.max
+    //         }
+    //         if(event.amount.min !== '' && event.amount.max !== '') {
+    //             amountTxt = precioTxt + 'entre ' + event.amount.min + ' y ' + event.amount.max
+    //         }
+    //         if(event.datetime !== '')
+    //         var date = new Date(event.datetime)
+    //         datetime = 'el ' + date.toLocaleDateString("es-MX", options)
+    //     break;
+    //     case 'en':
+    //         htmlSource = htmlSource + 'eng.html';
+    //         textSource = textSource + 'eng.txt';
+    //         let priceTxt = 'The suggested gift price is ';
+    //         if(event.amount.min !== '' && event.amount.max === '') {
+    //             amountTxt = priceTxt + 'minimum ' + event.amount.min
+    //         }
+    //         if(event.amount.min === '' && event.amount.max !== '') {
+    //             amountTxt = priceTxt + 'maximum ' + event.amount.max
+    //         }
+    //         if(event.amount.min !== '' && event.amount.max !== '') {
+    //             amountTxt = priceTxt + 'between ' + event.amount.min + ' and ' + event.amount.max
+    //         }
+    //         if(event.datetime !== '')
+    //             var date = new Date(event.datetime)
+    //             datetime = 'on ' + date.toLocaleDateString("en-US", options)
+    //         break;
+    //     default:
+    //         htmlSource = htmlSource + 'esp.html';
+    //         textSource = textSource + 'esp.txt';
+    // }
+
+    mergeDocument(htmlSource, event, participant, event.language, (htmlData) => {
+        mergeDocument(textSource, event, participant, event.language, (textData) => {
             return callback(htmlData, textData)
         })
     })
 }
 
-function mergeDocument(source, event, participant, amountTxt = '', datetime = '', callback) {
+function mergeDocument(source, event, participant, language, callback) {
+
+    let amountTxt, datetime = '';
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+
+    switch(language) {
+        case "es":
+            let precioTxt = 'El precio sugerido del regalo es ';
+            if(event.amount.min !== '' && event.amount.max === '') {
+                amountTxt = precioTxt + 'mínimo de ' + event.amount.min
+            } else if(event.amount.min === '' && event.amount.max !== '') {
+                amountTxt = precioTxt + 'máximo de ' + event.amount.max
+            } else if(event.amount.min !== '' && event.amount.max !== '') {
+                amountTxt = precioTxt + 'entre ' + event.amount.min + ' y ' + event.amount.max
+            }
+            if(event.datetime !== '') {
+                var date = new Date(event.datetime)
+                datetime = 'el ' + date.toLocaleDateString("es-MX", options)
+            }
+        break;
+        case "en":
+            let priceTxt = 'The suggested gift price is ';
+            if(event.amount.min !== '' && event.amount.max === '') {
+                amountTxt = priceTxt + 'minimum ' + event.amount.min
+            } else if(event.amount.min === '' && event.amount.max !== '') {
+                amountTxt = priceTxt + 'maximum ' + event.amount.max
+            } else if(event.amount.min !== '' && event.amount.max !== '') {
+                amountTxt = priceTxt + 'between ' + event.amount.min + ' and ' + event.amount.max
+            }
+            if(event.datetime !== '') {
+                var date = new Date(event.datetime)
+                datetime = 'on ' + date.toLocaleDateString("en-US", options)
+                console.log(datetime)
+            }
+        break;
+    }
+
+    const friend = event.participants.find(part => part.id == participant.friendid)
+    const token = generateToken(event.id, participant.id, participant.email)
 
     file = fs.readFile(path.join(__dirname, source), (err, data) => {
         if(err) {
             console.error(err)
             return
         }
-
-        let friend = event.participants.find(part => part.id == participant.friendid)
-        const token = generateToken(event.id, participant.id, participant.email)
 
         var template = Handlebars.compile(data.toString())
 
