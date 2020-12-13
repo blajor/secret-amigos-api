@@ -158,7 +158,8 @@ function mailSent(eventid, participantid, email, error) {
             logParticipantStatus(eventid, participantid, email, error === false ? 'accepted' : 'rejected', error === false, 'No ')
             return true;
         }
-    }).catch((_) => {
+    }).catch((error) => {
+        logParticipantStatus(eventid, participantid, email, 'rejected', false, error)
         return true;
     });
 }
