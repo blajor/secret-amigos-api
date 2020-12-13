@@ -27,7 +27,7 @@ app.get('/en/unsubscribe/:queryToken', (req, res) => {
     getQueryData(req.params.queryToken, (err, queryObject) => {
         if(err) return res.json({ error: err})
 
-        unsubscribeParticipant(queryObject, 'en', (err, response) => {
+        unsubscribeParticipant(queryObject, 'en', req.ip, (err, response) => {
             if(err)
                 return res.json({ error: err })
 
@@ -40,7 +40,7 @@ app.get('/es/unsubscribe/:queryToken', (req, res) => {
     getQueryData(req.params.queryToken, (err, queryObject) => {
         if(err) return res.json({ error: err})
 
-        unsubscribeParticipant(queryObject, 'es', (err, response) => {
+        unsubscribeParticipant(queryObject, 'es', req.ip, (err, response) => {
             if(err)
                 return res.json({ error: err })
 
@@ -53,7 +53,7 @@ app.get('/en/confirm/:queryToken', (req, res) => {
         getQueryData(req.params.queryToken, (err, queryObject) => {
             if(err) return res.json({ error: err})
 
-        confirmParticipant(queryObject, 'en', (err, response) => {
+        confirmParticipant(queryObject, 'en', req.ip, (err, response) => {
             if(err) 
                 return res.json({ error: err });
 
@@ -67,7 +67,7 @@ app.get('/es/confirm/:queryToken', (req, res) => {
     getQueryData(req.params.queryToken, (err, queryObject) => {
         if(err) return res.json({ error: err})
 
-        confirmParticipant(queryObject, 'es', (err, response) => {
+        confirmParticipant(queryObject, 'es', req.ip, (err, response) => {
             if(err) 
                 return res.json({ error: err });
 
@@ -80,7 +80,7 @@ app.get('/es/confirm/:queryToken', (req, res) => {
 app.get('/api/results/:eventid', authenticateToken, (req, res) => {
     const eventid = req.params.eventid;
 
-    viewParticipantStatus(eventid, (err, result) => {
+    viewParticipantStatus(eventid, req.ip, (err, result) => {
         if(err) return res.sendStatus(404).end();
 
         res.send(result);
@@ -101,9 +101,7 @@ app.post('/api/results', [
     const errors = validationResult(req);
     if(!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    console.log('IP',req.ip)
-
-    eventGateway(req.body, err => {
+    eventGateway(req.body, req.ip, err => {
         if(err) return res.status(404).json({errors: err});
 
         res.sendStatus(200);

@@ -10,7 +10,7 @@ function eventLogExists(event) {
         result ? true : false)
 }
 
-function eventSaved(event) {
+function eventSaved(event, ip) {
 
     let now = new Date()
 
@@ -22,13 +22,13 @@ function eventSaved(event) {
                     "updatedOn": now.toISOString(),
                     "sendemails": event.sendemails,
                     "countParticipants": event.participants.length,
-                    "server": process.env.SERVER_NAME
+                    "server": process.env.SERVER_NAME,
+                    "IP": ip
                 }
             }
         },
         // { upsert: true }
     ).catch(error => console.error(error))
-    console.log('event log created')
 
     // event.participants.forEach(part => participantSaved(event, part, now))
 }
@@ -61,7 +61,7 @@ function participantSaved(event, participant, now) {
 
 }
 
-function logParticipantStatus(eventid, participantid, email, status, successful, message) {
+function logParticipantStatus(eventid, participantid, email, status, successful, message, ip) {
 
     let now = new Date()
 
@@ -77,6 +77,7 @@ function logParticipantStatus(eventid, participantid, email, status, successful,
                     "status": status,
                     "successful": successful,
                     "message": message,
+                    "IP": ip
                 }
             }
         },
@@ -96,8 +97,30 @@ function findEvent(id, callback) {
     })
 }
 
+function statusReview(eventid, ip, result) {
+
+    let now = new Date()
+
+    collection.updateOne(
+        { "id": eventid },
+        { $push: 
+            {
+                "logs": {
+                    "updatedOn": now.toISOString(),
+                    "action": 'Check participant status',
+                    "result": result,
+                    "server": process.env.SERVER_NAME,
+                    "IP": ip
+                }
+            }
+        },
+        // { upsert: true }
+    ).catch(error => console.error(error))
+}
+
 module.exports = {
     setDBConn,
     eventSaved,
+    statusReview,
     logParticipantStatus,
 }

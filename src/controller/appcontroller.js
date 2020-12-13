@@ -8,6 +8,7 @@ const {
     saveEvent,
     unsubsParticipant,
     mailSent,
+    logViewStatus,
     setDBConnection,
     findEvent,
     findAll,
@@ -19,12 +20,12 @@ function setDB() {
     setDBConnection();
 }
 
-function eventGateway(event, callback) {
+function eventGateway(event, ip, callback) {
 
     if(typeof event.participants === 'undefined' || event.participants.length < 3)
         return callback('Unable to send < 3 participants. Please review and retry.');
 
-    saveEvent(event)
+    saveEvent(event, ip)
 
     if(event.sendemails) {
         // saveEvent(event)
@@ -70,8 +71,8 @@ function sendParticipantMail(event, participant) {
     })
 };
 
-function confirmParticipant(queryObject, language, callback) {
-    confParticipant(queryObject, (err, event) => {
+function confirmParticipant(queryObject, language, ip, callback) {
+    confParticipant(queryObject, ip, (err, event) => {
         if(err) return callback(err);
 
         const source = `../../templates/views/conf_${language}.html`
@@ -83,8 +84,8 @@ function confirmParticipant(queryObject, language, callback) {
     });
 };
 
-function unsubscribeParticipant(queryObject, language, callback) {
-    unsubsParticipant(queryObject, (err, event) => {
+function unsubscribeParticipant(queryObject, language, ip, callback) {
+    unsubsParticipant(queryObject, ip, (err, event) => {
         if(err)
             return callback(err);
 
@@ -97,7 +98,8 @@ function unsubscribeParticipant(queryObject, language, callback) {
     });
 };
 
-function viewParticipantStatus(eventid, callback) {
+function viewParticipantStatus(eventid, ip, callback) {
+
     findEvent(eventid, (error, targetEvent) => {
         if(error) return callback(error);
 
@@ -122,13 +124,16 @@ function viewParticipantStatus(eventid, callback) {
             }
         })
 
-        callback(undefined, {
+        let result = {
             mailaccepted,
             mailrejected,
             mailpending,
             invitationconfirmed,
             participantunsubscribed
-        });
+        }
+
+        logViewStatus(eventid, ip, result)
+        callback(undefined, result);
     })
 };
 

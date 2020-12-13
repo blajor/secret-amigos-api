@@ -2,6 +2,7 @@ const MongoClient = require('mongodb').MongoClient;
 const {
     setDBConn,
     eventSaved,
+    statusReview,
     logParticipantStatus,
 } = require('./logger')
 
@@ -56,7 +57,7 @@ function prepareEvent(newEvent, callback) {
     })
 }
 
-function saveEvent(event) {
+function saveEvent(event, ip) {
 
     const collection = db.collection('events');
 
@@ -68,7 +69,7 @@ function saveEvent(event) {
             { $set: preparedEvent },
             { upsert: true })
         .then((updatedEvent) => {
-            eventSaved(event)
+            eventSaved(event, ip)
         })
         .catch((error) => {
             console.error(error) //TODO CONSOLE LOG OK
@@ -77,7 +78,7 @@ function saveEvent(event) {
     return
 }
 
-function unsubsParticipant({eventid, participantid, email}, callback) {
+function unsubsParticipant({eventid, participantid, email}, ip, callback) {
     const collection = db.collection('events');
 
     collection.updateOne({
@@ -94,20 +95,20 @@ function unsubsParticipant({eventid, participantid, email}, callback) {
     }).then((result) => {
         if(result.matchedCount === 1) {
             findEvent(eventid, (err, event) => {
-                logParticipantStatus(eventid, participantid, email, 'unsubscribed', true)
+                logParticipantStatus(eventid, participantid, email, 'unsubscribed', true, ip)
                 return callback(undefined, event)
             })
         } else {
-            logParticipantStatus(eventid, participantid, email, 'unsubscribed', false, 'Participant does not belong to this event.')
+            logParticipantStatus(eventid, participantid, email, 'unsubscribed', false, 'Participant does not belong to this event.', ip)
             callback('Participant does not belong to this event.');
         }
     }).catch((error) => {
-        logParticipantStatus(eventid, participantid, email, 'unsubscribed', false, error)
+        logParticipantStatus(eventid, participantid, email, 'unsubscribed', false, error, ip)
         callback(error);
     });
 }
 
-function confParticipant({eventid, participantid, email}, callback) {
+function confParticipant({eventid, participantid, email}, ip, callback) {
     const collection = db.collection('events');
 
     collection.updateOne({
@@ -124,15 +125,15 @@ function confParticipant({eventid, participantid, email}, callback) {
     }).then((result) => {
         if(result.matchedCount === 1) {
             findEvent(eventid, (err, event) => {
-                logParticipantStatus(eventid, participantid, email, 'confirmed', true, '')
+                logParticipantStatus(eventid, participantid, email, 'confirmed', true, '', ip)
                 return callback(undefined, event);
             })
         } else {
-            logParticipantStatus(eventid, participantid, email, 'confirmed', false, 'Participant does not belong to this event.')
+            logParticipantStatus(eventid, participantid, email, 'confirmed', false, 'Participant does not belong to this event.', ip)
             callback('Participant does not belong to this event.');
         }
     }).catch((error) => {
-        logParticipantStatus(eventid, participantid, email, 'confirmed', false, error)
+        logParticipantStatus(eventid, participantid, email, 'confirmed', false, error, ip)
                 callback(error);
     });
 }
@@ -228,10 +229,15 @@ function findAll(callback) {
     })
 }
 
+function logViewStatus(eventid, ip, result) {
+    statusReview(eventid, ip, result)
+}
+
 module.exports = {
     saveEvent,
     unsubsParticipant,
     mailSent,
+    logViewStatus,
     setDBConnection,
     findEvent,
     findAll,
