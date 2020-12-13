@@ -10,6 +10,7 @@ const {
     mailSent,
     setDBConnection,
     findEvent,
+    findAll,
     deleteEventSoft,
     confParticipant,
 } = require('../../utils/dbmanager');
@@ -267,6 +268,89 @@ function deleteEvent(id, callback) {
     });
 }
 
+function getDash(callback) {
+    findAll((error, list) => {
+
+        let totalEventos = list.length
+        let totalEventosEs = 0 
+        let totalEventosEn = 0
+        let totalParticipantes = 0
+        let totalAccepted = 0
+        let totalConfirmed = 0
+        let totalUnsubscribed = 0
+        let totalRejected = 0
+        let totalPending = 0
+
+        list.forEach(ev => {
+            if(ev.language === 'en') {
+                totalEventosEn++
+            } 
+            if(ev.language === 'es') totalEventosEs++
+            totalParticipantes += ev.participants.length
+            ev.participants.forEach(part => {
+                switch(part.status) {
+                    case 'accepted': totalAccepted++
+                    break;
+                    case 'rejected': totalRejected++
+                    break;
+                    case 'pending': totalPending++
+                    break;
+                    case 'confirmed': totalConfirmed++
+                    break;
+                    case 'unsubscribed': totalUnsubscribed++
+                    break;
+                }
+            })
+        })
+
+        const source = '../../templates/views/dashboard.html'
+        // const participant = event.participants.find(part => part.id === queryObject.participantid)
+        // console.log(list)
+        const results = {
+            totalEventos,
+            totalEventosEs,
+            totalEventosEn,
+            totalParticipantes,
+            totalAccepted,
+            totalConfirmed,
+            totalUnsubscribed,
+            totalRejected,
+            totalPending,
+        }
+
+
+        mergeDash(source, results, response => {
+            callback(response)
+        })
+    
+    })
+}
+
+function mergeDash(source, results, callback) {
+
+    file = fs.readFile(path.join(__dirname, source), (err, data) => {
+        if(err) {
+            console.error(err)
+            return
+        }
+
+        var template = Handlebars.compile(data.toString())
+
+        var data = {
+            "totalEventos": results.totalEventos,
+            "totalEventosEs": results.totalEventosEs,
+            "totalEventosEn": results.totalEventosEn,
+            "totalParticipantes": results.totalParticipantes,
+            "totalAccepted": results.totalAccepted,
+            "totalConfirmed": results.totalConfirmed,
+            "totalUnsubscribed": results.totalUnsubscribed,
+            "totalRejected": results.totalRejected,
+            "totalPending": results.totalPending,
+        }
+        return callback(template(data))
+    })
+}
+
 module.exports = {
     eventGateway,
     unsubscribeParticipant,
@@ -274,4 +358,5 @@ module.exports = {
     viewParticipantStatus,
     deleteEvent,
     setDB,
+    getDash,
 }

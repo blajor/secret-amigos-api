@@ -8,6 +8,7 @@ const {
     viewParticipantStatus,
     deleteEvent,
     setDB,
+    getDash,
 } = require('./controller/appcontroller');
 const { authenticateToken, getQueryData } = require('../utils/authenticator');
 
@@ -114,6 +115,12 @@ app.delete('/api/events/:eventid', authenticateToken, (req, res) => {
         if(err) return res.sendStatus(404).end();
 
         res.send(result);
+    })
+})
+
+app.get('/dash', (req, res) => {
+    getDash(result => {
+        res.send(result)
     })
 })
 

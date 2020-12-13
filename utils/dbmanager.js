@@ -167,7 +167,7 @@ function mailSent(eventid, participantid, email, error) {
 function findEvent(id, callback) {
     const collection = db.collection('events');
 
-    collection.findOne({id, deleted: false})
+    collection.findOne({"id": id, deleted: false})
     .then(targetEvent => {
         if(targetEvent === null) return callback('Event does not exist.');
         callback(undefined, targetEvent);
@@ -208,12 +208,33 @@ function deleteEventSoft(id, callback) {
     });
 }
 
+function findAll(callback) {
+    let list = []
+    const collection = db.collection('events');
+
+    // collection.find({}, (error, result) => {
+    //     console.log('error',error)
+    //     console.log('result',result)
+    //     while(result.hasNext()) {
+    //         list.push(result)
+    //     }
+    //     callback(list)
+    // })
+
+    collection.find({}).toArray((err, result) => {
+        // if(err) throw err
+        // console.log(result)
+        callback(err, result)
+    })
+}
+
 module.exports = {
     saveEvent,
     unsubsParticipant,
     mailSent,
     setDBConnection,
     findEvent,
+    findAll,
     confParticipant,
     deleteEventSoft,
     findParticipant,
