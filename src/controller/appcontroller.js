@@ -23,19 +23,21 @@ function eventGateway(event, callback) {
     if(typeof event.participants === 'undefined' || event.participants.length < 3)
         return callback('Unable to send < 3 participants. Please review and retry.');
 
+    saveEvent(event)
+
     if(event.sendemails) {
-        saveEvent(event)
+        // saveEvent(event)
         event.participants.forEach(participant => sendParticipantMail(event, participant))
         callback()
     }
     else {
         event.participants.forEach(participant => {
             if(participant.sendemail) {
-                saveEvent(event)
+                // saveEvent(event)
                 sendParticipantMail(event, participant)
             }
-            else
-                saveEvent(event)
+            // else
+            //     saveEvent(event)
         })
         callback()
     }
@@ -62,7 +64,7 @@ function sendParticipantMail(event, participant) {
         mailOptions.html = html
         mailOptions.text = text
         sendMail(mailOptions, error => {
-            mailSent(event.id, participant.id, error)
+            mailSent(event.id, participant.id, participant.email, error)
         })
     })
 };
