@@ -1,10 +1,127 @@
-<p>Numero total de eventos: {{totalEventos}}</p>
-<p>Numero total de eventos en español: {{totalEventosEs}}</p>
-<p>Numero total de eventos en ingles: {{totalEventosEn}}</p>
-<br>
-<p>Numero total de participantes: {{totalParticipantes}}</p>
-<p>Numero total de emails pendientes: {{totalPending}}</p>
-<p>Numero total de emails aceptados: {{totalAccepted}}</p>
-<p>Numero total de emails rechazados: {{totalRejected}}</p>
-<p>Numero total de participantes confirmados: {{totalConfirmed}}</p>
-<p>Numero total de participantes dados de baja: {{totalUnsubscribed}}</p>
+<!DOCTYPE html>
+<html lang="en">
+
+    <!-- Basic -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">   
+   
+    <!-- Mobile Metas -->
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+ 
+     <!-- Site Metas -->
+    <title>Secret Amigo - Confirmation</title>  
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Site Icons -->
+    <link rel="shortcut icon" href="https://secretamigoapp.com/images/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="https://secretamigoapp.com/images/Icon-App-29x29@3x.png">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://secretamigoapp.com/css/bootstrap.min.css">
+    <!-- Site CSS -->
+    <link rel="stylesheet" href="https://secretamigoapp.com/style.css">    
+    <!-- ALL VERSION CSS -->
+    <link rel="stylesheet" href="https://secretamigoapp.com/css/versions.css">
+    <!-- Responsive CSS -->
+    <link rel="stylesheet" href="https://secretamigoapp.com/css/responsive.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="https://secretamigoapp.com/css/custom.css">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body class="app_version" data-spy="scroll" data-target="#navbarApp" data-offset="98">
+    <body class="app_version" data-spy="scroll" data-target="#navbarApp" data-offset="98">
+
+        <!-- LOADER -->
+        <!-- <div id="preloader">
+            <img class="preloader" src="images/loaders/loader-app.gif" alt="">
+        </div> end loader -->
+        <!-- END LOADER -->
+        
+        <header class="header header_style_01">
+            <nav class="navbar header-nav navbar-expand-lg">
+                <div class="container">
+                    <a class="navbar-brand" href="https://secretamigoapp.com"><img src="https://secretamigoapp.com/images/logos/logo-app.png" alt="image"></a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarApp" aria-controls="navbarApp" aria-expanded="false" aria-label="Toggle navigation">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <div class="collapse navbar-collapse justify-content-end" id="navbarApp">
+                        <ul class="navbar-nav">
+                            <li><a class="nav-link" href="https://secretamigoapp.com#home">Home</a></li>
+                            <li><a class="nav-link" href="https://secretamigoapp.com#features">Features</a></li>
+                            <li><a class="nav-link" href="https://secretamigoapp.com#team">Team</a></li>
+                            <li><a class="nav-link" href="https://secretamigoapp.com#testimonials">Users</a></li>
+                            <li><a class="nav-link" href="https://secretamigoapp.com#support">Contact Us</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    
+        <div id="home" class="parallax first-section" style="background-image:url('https://secretamigoapp.com/uploads/bg-img.jpg');">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12">
+                        <div class="big-tagline">
+                            <!-- <h2>Hi {{toname}} {{tosurname}}!</h2> -->
+                            <p class="lead">Total events: {{totalEventos}}<br>
+                                Total events in Spanish: {{totalEventosEs}}<br>
+                                Total events in English: {{totalEventosEn}}</p>
+                            <p class="lead">Total guests: {{totalParticipantes}}<br>
+                                Total pending emails: {{totalPending}}<br>
+                                Total accepted emails: {{totalAccepted}}<br>
+                                Total rejected emails: {{totalRejected}}<br>
+                                Total confirmed guests: {{totalConfirmed}}<br>
+                                Total unsubscribed guests: {{totalUnsubscribed}}</p>
+    
+                            <!-- <a data-scroll href="https://apps.apple.com/us/app/secret-amigo/id1540750726" class="btn btn-light btn-radius btn-brd"><i class="fa fa-apple" aria-hidden="true"></i> App Store</a> -->
+                        </div>
+                    </div>
+                    <!-- <div class="app_iphone_01 wow slideInUp hidden-xs hidden-sm" data-wow-duration="1s" data-wow-delay="0.2s">
+                        <img src="https://secretamigoapp.com/uploads/app_iphone_01.png" alt="" class="img-fluid">
+                    </div>
+                    <div class="app_iphone_02 wow slideInUp hidden-xs hidden-sm" data-wow-duration="1s" data-wow-delay="0.5s">
+                        <img src="https://secretamigoapp.com/uploads/app_iphone_02.png" alt="" class="img-fluid">
+                    </div> -->
+                </div><!-- end row -->
+            </div><!-- end container -->
+        </div><!-- end section -->
+    
+    
+        <div class="copyrights">
+            <div class="container">
+                <div class="footer-distributed">
+                    <div class="footer-left">                    
+                        <p class="footer-company-name"><a href="https://secretamigoapp.com"> Secret Amigo</a> All Rights Reserved. &copy; 2020 • <a href="https://secretamigoapp.com/privacy-policy.html">Privacy Policy</a>.</p>
+                    </div>
+                </div>
+            </div><!-- end container -->
+        </div><!-- end copyrights -->
+    
+        <a href="https://secretamigoapp.com/#home" data-scroll class="dmtop global-radius"><i class="fa fa-angle-up"></i></a>
+    
+        <!-- ALL JS FILES -->
+        <script src="https://secretamigoapp.com/js/all.js"></script>
+        <!-- ALL PLUGINS -->
+        <script src="https://secretamigoapp.com/js/custom.js"></script>
+        <script src="https://secretamigoapp.com/js/zenith.js"></script>
+        <script>
+            $('#default').zenith({
+                layout: 'default' , 
+                slideSpeed: 450, 
+                autoplaySpeed: 2000
+            });
+        </script>
+    </body>
+    </html>
+
+
