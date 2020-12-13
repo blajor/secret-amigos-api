@@ -21,7 +21,8 @@ function eventSaved(event) {
                 "logs": {
                     "updatedOn": now.toISOString(),
                     "sendemails": event.sendemails,
-                    "countParticipants": event.participants.length
+                    "countParticipants": event.participants.length,
+                    "server": process.env.SERVER_NAME
                 }
             }
         },
