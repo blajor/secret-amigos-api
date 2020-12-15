@@ -25,7 +25,6 @@ function authenticateToken(req, res, next) {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
         if(err) return res.sendStatus(403);
 
-        console.log(user.name)
         const auth = authMatrix.find(perm => perm.route === req.originalUrl.substring(0, perm.route.length))
 
         if(auth) {
