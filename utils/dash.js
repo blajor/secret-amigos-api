@@ -18,6 +18,11 @@ function generateDashData(callback) {
         let pending = 0
 
         list.forEach(ev => {
+
+            if(ev.logs) {
+                fetchIPData(ev.logs[0].IP)
+            }
+
             if(ev.language === 'en') {
                 eventsEn++
             } 
@@ -42,7 +47,7 @@ function generateDashData(callback) {
         callback({
             events,
             eventsEs,
-            eventsEs,
+            eventsEn,
             participants,
             accepted,
             confirmed,
@@ -87,6 +92,10 @@ function mergeDash(source, results, callback) {
         }
         return callback(template(data))
     })
+}
+
+function fetchIPData(ip) {
+
 }
 
 module.exports = {
