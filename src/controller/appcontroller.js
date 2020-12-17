@@ -199,6 +199,8 @@ function mergeDocument(source, event, participant, language, callback) {
 
     let amountTxt, datetime, location = '';
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Dicimbre']
 
     switch(language) {
         case "es":
@@ -211,8 +213,11 @@ function mergeDocument(source, event, participant, language, callback) {
                 amountTxt = precioTxt + 'entre ' + event.amount.min + ' y ' + event.amount.max
             }
             if(event.datetime !== '') {
+                // TODO the following lines are the proper way to display dates
                 var date = new Date(event.datetime)
                 datetime = 'el ' + date.toLocaleDateString("es-MX", options)
+                // TODO the following line fixes how the date is displayed on the email body
+                datetime = 'on ' + meses[parseInt(event.datetime.substring(5,7))-1] + ' ' + event.datetime.substring(8,10) + ', ' + event.datetime.substring(0,4)
             }
             if(event.location !== '') {
                 location = 'Ubicación: ' + event.location
@@ -228,8 +233,11 @@ function mergeDocument(source, event, participant, language, callback) {
                 amountTxt = priceTxt + 'between ' + event.amount.min + ' and ' + event.amount.max
             }
             if(event.datetime !== '') {
-                var date = new Date(event.datetime)
-                datetime = 'on ' + date.toLocaleDateString("en-US", options)
+                // TODO the following lines are the proper way to display dates
+                // var date = new Date(event.datetime)
+                // datetime = 'el ' + date.toLocaleDateString("en-US", options)
+                // TODO the following line fixes how the date is displayed on the email body
+                datetime = 'on ' + months[parseInt(event.datetime.substring(5,7))-1] + ' ' + event.datetime.substring(8,10) + ', ' + event.datetime.substring(0,4)
             }
             if(event.location !== '') {
                 location = 'Location: ' + event.location

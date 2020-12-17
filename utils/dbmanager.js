@@ -210,27 +210,48 @@ function deleteEventSoft(id, callback) {
 }
 
 function findAll(callback) {
-    let list = []
     const collection = db.collection('events');
-
-    // collection.find({}, (error, result) => {
-    //     console.log('error',error)
-    //     console.log('result',result)
-    //     while(result.hasNext()) {
-    //         list.push(result)
-    //     }
-    //     callback(list)
-    // })
-
     collection.find({}).toArray((err, result) => {
-        // if(err) throw err
-        // console.log(result)
         callback(err, result)
     })
 }
 
 function logViewStatus(eventid, ip, result) {
     statusReview(eventid, ip, result)
+}
+
+function existIP(ip, callback) {
+
+    const collection = db.collection('ipdata')
+
+    collection.findOne({"ip": ip}, (error, data) => {
+        if(error) console.error(error)
+
+        else if (data) callback(true)
+        else callback(false)
+    })
+    /*
+    collection.find({"ip":ip}).toArray((err, result) => {
+        if(err) return callback(false)
+        else {
+            callback(result.length > 0)
+        }
+    })
+    */
+}
+
+function saveIPData(ipData) {
+
+    const collection = db.collection('ipdata')
+    collection.updateOne(
+        { ip: ipData.ip },
+        { $set: ipData },
+        { upsert: true })
+    .catch((error) => {
+        console.error(error) //TODO CONSOLE LOG OK
+    });
+    return
+
 }
 
 module.exports = {
@@ -244,4 +265,6 @@ module.exports = {
     confParticipant,
     deleteEventSoft,
     findParticipant,
+    saveIPData,
+    existIP,
 }

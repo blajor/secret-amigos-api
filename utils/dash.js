@@ -1,7 +1,8 @@
 const path = require('path');
 const Handlebars = require('handlebars');
 const fs = require('fs');
-const { findAll } = require('./dbmanager');
+const { findAll, saveIPData, existIP } = require('./dbmanager');
+const ipdata = require('./ipdata')
 
 function generateDashData(callback) {
 
@@ -16,11 +17,22 @@ function generateDashData(callback) {
         let unsubscribed = 0
         let rejected = 0
         let pending = 0
+        let raspberry = 0
+        let heroku = 0
 
         list.forEach(ev => {
 
             if(ev.logs) {
-                fetchIPData(ev.logs[0].IP)
+                ev.logs.forEach(log => {
+                    // if(log.IP && log.IP != null) fetchIPData(log.IP)
+
+                    if(log.server) {
+                        if(log.server === 'PI') {
+                            raspberry++
+                        } else if (log.server === 'HEROKU')
+                            heroku++
+                        }
+                    })
             }
 
             if(ev.language === 'en') {
@@ -41,6 +53,7 @@ function generateDashData(callback) {
                     case 'unsubscribed': unsubscribed++
                     break;
                 }
+
             })
         })
 
@@ -54,6 +67,8 @@ function generateDashData(callback) {
             unsubscribed,
             rejected,
             pending,
+            raspberry,
+            heroku,
         })
     
     })
@@ -89,13 +104,34 @@ function mergeDash(source, results, callback) {
             "unsubscribed": results.unsubscribed,
             "rejected": results.rejected,
             "pending": results.pending,
+            "raspberry": results.raspberry,
+            "heroku": results.heroku
         }
         return callback(template(data))
     })
 }
 
-function fetchIPData(ip) {
+async function fetchIPData (ip) {
 
+    existIP(ip.substring(7), exist => {
+        if(exist) return
+        
+        else {
+            ipdata(ip.substring(7), (err, response) => {
+                if(err) return
+                else {
+                    if(typeof response.ip != 'undefined') {
+                        saveIPData(response)
+                        return
+                    } else {
+                        console.error(error)
+                        return
+                    }
+                }
+            })
+        }
+    })
+    return
 }
 
 module.exports = {
