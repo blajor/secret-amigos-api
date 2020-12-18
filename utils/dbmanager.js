@@ -254,6 +254,66 @@ function saveIPData(ipData) {
 
 }
 
+async function testMongoDB() {
+
+    // const collection = db.collection('ipdata')
+
+    // collection.aggregate([
+    //     { $match: { } },
+    //     { $group: { _id: '$country_name', count: { $sum: 1 }} },
+    //     { $sort: { count: -1 }}
+    // ]).toArray((err, result) => {
+    //     console.log(result)
+    // })
+
+    // console.log(await collection.countDocuments({country_name: "Mexico"}))
+
+    // console.log(await collection.distinct('country_name'))
+
+    const collection = db.collection('events')
+
+    console.log(await collection.countDocuments({}))
+
+    collection.aggregate([
+        { $match: {} },
+        { $group: { _id: '$language', count: { $sum: 1 } } },
+        { $sort: { count: -1 }}
+    ]).toArray((err, result) => {
+        if(err) console.error('Error',err)
+        else console.log('Result',result)
+    })
+
+    collection.aggregate([
+        // { $match: {} },
+        { $unwind: '$participants' },
+        { $group: { _id: '$participants.status', count: { $sum: 1 }} },
+        { $sort: { count: -1} }
+    ]).toArray((err, result) => {
+        if(err) console.error('Error',err)
+        else console.log('Result',result)
+    })
+
+    collection.aggregate([
+        { $unwind: '$logs'},
+        { $group: { _id: '$logs.server', count: { $sum: 1 } } },
+        { $sort: { count: -1 }}
+    ]).toArray((err, result) => {
+        if(err) console.error('Error',err)
+        else console.log('Result',result)
+    })
+
+    collection.aggregate([
+        { $unwind: '$participants.logs' },
+        { $group: { _id: '$participants.logs.ip', count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+    ]).toArray((err, result) => {
+        console.log('Test')
+        if(err) console.error('Error',err)
+        else console.log('Result',result)
+    })
+}
+
+
 module.exports = {
     saveEvent,
     unsubsParticipant,
@@ -267,4 +327,5 @@ module.exports = {
     findParticipant,
     saveIPData,
     existIP,
+    testMongoDB,
 }

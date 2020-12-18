@@ -77,7 +77,8 @@ function logParticipantStatus(eventid, participantid, email, status, successful,
                     "status": status,
                     "successful": successful,
                     "message": message,
-                    "IP": ip
+                    "IP": ip,
+                    "server": process.env.SERVER_NAME,
                 }
             }
         },

@@ -10,6 +10,7 @@ const {
     setDB,
     getDashPage,
     getDashData,
+    prepareDash,
 } = require('./controller/appcontroller');
 const { authenticateToken, getQueryData } = require('../utils/authenticator');
 
@@ -127,6 +128,12 @@ app.get('/dash', (req, res) => {
 
 app.get('/api/dashboard', authenticateToken, (req, res) => {
     getDashData(result => {
+        res.send(result)
+    })
+})
+
+app.post('/api/preparedash', (req, res) => {
+    prepareDash(result => {
         res.send(result)
     })
 })

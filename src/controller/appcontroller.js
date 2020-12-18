@@ -7,6 +7,7 @@ const { generateToken } = require('../../utils/authenticator')
 const {
     generateDashPage,
     generateDashData,
+    prepareDashData,
 } = require ('../../utils/dash')
 const { 
     saveEvent,
@@ -200,7 +201,7 @@ function mergeDocument(source, event, participant, language, callback) {
     let amountTxt, datetime, location = '';
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Dicimbre']
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 
     switch(language) {
         case "es":
@@ -214,10 +215,10 @@ function mergeDocument(source, event, participant, language, callback) {
             }
             if(event.datetime !== '') {
                 // TODO the following lines are the proper way to display dates
-                var date = new Date(event.datetime)
-                datetime = 'el ' + date.toLocaleDateString("es-MX", options)
+                // var date = new Date(event.datetime)
+                // datetime = 'el ' + date.toLocaleDateString("es-MX", options)
                 // TODO the following line fixes how the date is displayed on the email body
-                datetime = 'on ' + meses[parseInt(event.datetime.substring(5,7))-1] + ' ' + event.datetime.substring(8,10) + ', ' + event.datetime.substring(0,4)
+                datetime = 'el ' + meses[parseInt(event.datetime.substring(5,7))-1] + ' ' + event.datetime.substring(8,10) + ', ' + event.datetime.substring(0,4)
             }
             if(event.location !== '') {
                 location = 'Ubicación: ' + event.location
@@ -292,6 +293,10 @@ function getDashData(callback) {
     generateDashData(response => callback(response))
 }
 
+function prepareDash(callback) {
+    prepareDashData(response => callback(response))
+}
+
 module.exports = {
     eventGateway,
     unsubscribeParticipant,
@@ -301,4 +306,5 @@ module.exports = {
     setDB,
     getDashPage,
     getDashData,
+    prepareDash,
 }

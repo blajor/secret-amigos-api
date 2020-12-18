@@ -1,7 +1,12 @@
 const path = require('path');
 const Handlebars = require('handlebars');
 const fs = require('fs');
-const { findAll, saveIPData, existIP } = require('./dbmanager');
+const {
+    findAll,
+    saveIPData,
+    existIP,
+    testMongoDB,
+} = require('./dbmanager');
 const ipdata = require('./ipdata')
 
 function generateDashData(callback) {
@@ -134,7 +139,14 @@ async function fetchIPData (ip) {
     return
 }
 
+function prepareDashData(callback) {
+
+    testMongoDB()
+    callback()
+}
+
 module.exports = {
     generateDashPage,
     generateDashData,
+    prepareDashData,
 }
