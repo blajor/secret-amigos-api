@@ -333,18 +333,18 @@ async function dashboardData(callback) {
                     result.forEach(r => data[r._id] = r.count )
 
                     callback({
-                        events: data.events ?? 0,
-                        eventsEs: data.es ?? 0,
-                        eventsEn: data.en ?? 0,
-                        participants: data.participants ?? 0,
-                        pending: data.pending ?? 0,
-                        accepted: data.accepted ?? 0,
-                        rejected: data.rejected ?? 0,
-                        confirmed: data.confirmed ?? 0,
-                        unsubscribed: data.unsubscribed ?? 0,
-                        raspberry: data.PI ?? 0,
-                        heroku: data.HEROKU ?? 0,
-                        serverUnknown: data.null ?? 0,
+                        events: data.events ? data.events : 0,
+                        eventsEs: data.es ? data.es : 0,
+                        eventsEn: data.en ? data.en : 0,
+                        participants: data.participants ? data.participants : 0,
+                        pending: data.pending ? data.pending : 0,
+                        accepted: data.accepted ? data.accepted : 0,
+                        rejected: data.rejected ? data.rejected : 0,
+                        confirmed: data.confirmed ? data.confirmed : 0,
+                        unsubscribed: data.unsubscribed ? data.unsubscribed : 0,
+                        raspberry: data.PI ? data.PI : 0,
+                        heroku: data.HEROKU ? data.HEROKU : 0,
+                        serverUnknown: data.null ? data.null : 0,
                     })
                 })
             })
