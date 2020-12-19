@@ -333,7 +333,7 @@ async function dashboardData(callback) {
                     result.forEach(r => data[r._id] = r.count )
 
                     callback({
-                        events: data.events ? data.events : 0,
+                        events: data.events ?? 0,
                         eventsEs: data.es ? data.es : 0,
                         eventsEn: data.en ? data.en : 0,
                         participants: data.participants ? data.participants : 0,
