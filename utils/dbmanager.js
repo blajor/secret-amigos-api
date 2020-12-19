@@ -261,7 +261,7 @@ function languages(collection, callback) {
         { $group: { _id: '$language', count: { $sum: 1 } } },
         { $sort: { count: -1 } }
     ]).toArray((err, result) => {
-        callback(err ? err : result)
+        callback(err ?? result)
     })
 }
 
@@ -272,7 +272,7 @@ function totalParticipants(collection, callback) {
         { $group: { _id: 'participants', count: { $sum: { $size: '$participants' } } } },
         { $sort: { count: -1 } }
     ]).toArray((err, result) => {
-        callback( err ? err : result )
+        callback( err ?? result )
     })
 }
 
@@ -283,7 +283,7 @@ function participantsStatus(collection, callback) {
         { $group: { _id: '$participants.status', count: { $sum: 1 }} },
         { $sort: { count: -1} }
     ]).toArray((err, result) => {
-        callback( err ? err : result )
+        callback( err ?? result )
     })
 }
 
@@ -294,7 +294,7 @@ function serverUsage(collection, callback) {
         { $group: { _id: '$logs.server', count: { $sum: 1 } } },
         { $sort: { count: -1 } }
     ]).toArray((err, result) => {
-        callback(err ? err : result)
+        callback(err ?? result)
     })
 }
 
@@ -334,17 +334,17 @@ async function dashboardData(callback) {
 
                     callback({
                         events: data.events ?? 0,
-                        eventsEs: data.es ? data.es : 0,
-                        eventsEn: data.en ? data.en : 0,
-                        participants: data.participants ? data.participants : 0,
-                        pending: data.pending ? data.pending : 0,
-                        accepted: data.accepted ? data.accepted : 0,
-                        rejected: data.rejected ? data.rejected : 0,
-                        confirmed: data.confirmed ? data.confirmed : 0,
-                        unsubscribed: data.unsubscribed ? data.unsubscribed : 0,
-                        raspberry: data.PI ? data.PI : 0,
-                        heroku: data.HEROKU ? data.HEROKU : 0,
-                        serverUnknown: data.null ? data.null : 0,
+                        eventsEs: data.es ?? 0,
+                        eventsEn: data.en ?? 0,
+                        participants: data.participants ?? 0,
+                        pending: data.pending ?? 0,
+                        accepted: data.accepted ?? 0,
+                        rejected: data.rejected ?? 0,
+                        confirmed: data.confirmed ?? 0,
+                        unsubscribed: data.unsubscribed ?? 0,
+                        raspberry: data.PI ?? 0,
+                        heroku: data.HEROKU ?? 0,
+                        serverUnknown: data.null ?? 0,
                     })
                 })
             })
