@@ -5,10 +5,11 @@ const {
     findAll,
     saveIPData,
     existIP,
-    testMongoDB,
+    dashboardData,
 } = require('./dbmanager');
 const ipdata = require('./ipdata')
 
+/*
 function generateDashData(callback) {
 
     findAll((error, list) => {
@@ -79,6 +80,13 @@ function generateDashData(callback) {
     })
 
 }
+*/
+
+function generateDashData(callback) {
+    dashboardData(data => {
+        callback(data)
+    })
+}
 
 function generateDashPage(callback) {
     generateDashData(data => {
@@ -98,21 +106,7 @@ function mergeDash(source, results, callback) {
         }
 
         var template = Handlebars.compile(data.toString())
-
-        var data = {
-            "events": results.events,
-            "eventsEs": results.eventsEs,
-            "eventsEn": results.eventsEn,
-            "participants": results.participants,
-            "accepted": results.accepted,
-            "confirmed": results.confirmed,
-            "unsubscribed": results.unsubscribed,
-            "rejected": results.rejected,
-            "pending": results.pending,
-            "raspberry": results.raspberry,
-            "heroku": results.heroku
-        }
-        return callback(template(data))
+        callback(template(results))
     })
 }
 
@@ -141,8 +135,8 @@ async function fetchIPData (ip) {
 
 function prepareDashData(callback) {
 
-    testMongoDB()
-    callback()
+    // testMongoDB()
+    // callback()
 }
 
 module.exports = {

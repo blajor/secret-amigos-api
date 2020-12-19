@@ -254,7 +254,51 @@ function saveIPData(ipData) {
 
 }
 
-async function testMongoDB() {
+function languages(collection, callback) {
+
+    collection.aggregate([
+        { $match: {} },
+        { $group: { _id: '$language', count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+    ]).toArray((err, result) => {
+        callback(err ?? result)
+    })
+}
+
+function totalParticipants(collection, callback) {
+
+    collection.aggregate([
+        { $match: {} },
+        { $group: { _id: 'participants', count: { $sum: { $size: '$participants' } } } },
+        { $sort: { count: -1 } }
+    ]).toArray((err, result) => {
+        callback( err ?? result )
+    })
+}
+
+function participantsStatus(collection, callback) {
+
+    collection.aggregate([
+        { $unwind: '$participants' },
+        { $group: { _id: '$participants.status', count: { $sum: 1 }} },
+        { $sort: { count: -1} }
+    ]).toArray((err, result) => {
+        callback( err ?? result )
+    })
+}
+
+function serverUsage(collection, callback) {
+
+    collection.aggregate([
+        { $unwind: '$logs'},
+        { $group: { _id: '$logs.server', count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+    ]).toArray((err, result) => {
+        callback(err ?? result)
+    })
+}
+
+async function dashboardData(callback) {
 
     // const collection = db.collection('ipdata')
 
@@ -270,46 +314,41 @@ async function testMongoDB() {
 
     // console.log(await collection.distinct('country_name'))
 
+    let data = {}
+
     const collection = db.collection('events')
 
-    console.log(await collection.countDocuments({}))
+    data.events = await collection.countDocuments({})
 
-    collection.aggregate([
-        { $match: {} },
-        { $group: { _id: '$language', count: { $sum: 1 } } },
-        { $sort: { count: -1 }}
-    ]).toArray((err, result) => {
-        if(err) console.error('Error',err)
-        else console.log('Result',result)
-    })
+    languages(collection, result => {
+        result.forEach(r => data[r._id] = r.count )
 
-    collection.aggregate([
-        // { $match: {} },
-        { $unwind: '$participants' },
-        { $group: { _id: '$participants.status', count: { $sum: 1 }} },
-        { $sort: { count: -1} }
-    ]).toArray((err, result) => {
-        if(err) console.error('Error',err)
-        else console.log('Result',result)
-    })
+        participantsStatus(collection, result => {
+            result.forEach(r => data[r._id] = r.count )
+        
+            serverUsage(collection, result => {
+                result.forEach(r => data[r._id] = r.count )
 
-    collection.aggregate([
-        { $unwind: '$logs'},
-        { $group: { _id: '$logs.server', count: { $sum: 1 } } },
-        { $sort: { count: -1 }}
-    ]).toArray((err, result) => {
-        if(err) console.error('Error',err)
-        else console.log('Result',result)
-    })
+                totalParticipants(collection, result => {
+                    result.forEach(r => data[r._id] = r.count )
 
-    collection.aggregate([
-        { $unwind: '$participants.logs' },
-        { $group: { _id: '$participants.logs.ip', count: { $sum: 1 } } },
-        { $sort: { count: -1 } }
-    ]).toArray((err, result) => {
-        console.log('Test')
-        if(err) console.error('Error',err)
-        else console.log('Result',result)
+                    callback({
+                        events: data.events ?? 0,
+                        eventsEs: data.es ?? 0,
+                        eventsEn: data.en ?? 0,
+                        participants: data.participants ?? 0,
+                        pending: data.pending ?? 0,
+                        accepted: data.accepted ?? 0,
+                        rejected: data.rejected ?? 0,
+                        confirmed: data.confirmed ?? 0,
+                        unsubscribed: data.unsubscribed ?? 0,
+                        raspberry: data.PI ?? 0,
+                        heroku: data.HEROKU ?? 0,
+                        serverUnknown: data.null ?? 0,
+                    })
+                })
+            })
+        })
     })
 }
 
@@ -327,5 +366,5 @@ module.exports = {
     findParticipant,
     saveIPData,
     existIP,
-    testMongoDB,
+    dashboardData,
 }
