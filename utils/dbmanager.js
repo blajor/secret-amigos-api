@@ -261,7 +261,7 @@ function languages(collection, callback) {
         { $group: { _id: '$language', count: { $sum: 1 } } },
         { $sort: { count: -1 } }
     ]).toArray((err, result) => {
-        callback(err ?? result)
+        callback(err ? err : result)
     })
 }
 
@@ -272,7 +272,7 @@ function totalParticipants(collection, callback) {
         { $group: { _id: 'participants', count: { $sum: { $size: '$participants' } } } },
         { $sort: { count: -1 } }
     ]).toArray((err, result) => {
-        callback( err ?? result )
+        callback( err ? err : result )
     })
 }
 
@@ -283,7 +283,7 @@ function participantsStatus(collection, callback) {
         { $group: { _id: '$participants.status', count: { $sum: 1 }} },
         { $sort: { count: -1} }
     ]).toArray((err, result) => {
-        callback( err ?? result )
+        callback( err ? err : result )
     })
 }
 
@@ -294,7 +294,7 @@ function serverUsage(collection, callback) {
         { $group: { _id: '$logs.server', count: { $sum: 1 } } },
         { $sort: { count: -1 } }
     ]).toArray((err, result) => {
-        callback(err ?? result)
+        callback(err ? err : result)
     })
 }
 
