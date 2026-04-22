@@ -50,11 +50,14 @@ async function checkJwt() {
 
 function checkIcal() {
     try {
-        if (!process.env.MAIL_USER) {
+        const requiredEnvVars = ['MAIL_USER', 'DOMAIN_NAME'];
+        const missingEnvVars = requiredEnvVars.filter((name) => !process.env[name]);
+
+        if (missingEnvVars.length > 0) {
             return {
                 name: 'iCal generation',
                 ok: true,
-                detail: 'Skipped (MAIL_USER not set)'
+                detail: `Skipped (${missingEnvVars.join(', ')} not set)`
             };
         }
 
