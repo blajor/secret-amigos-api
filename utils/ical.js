@@ -10,7 +10,7 @@ function getIcalObjectInstance(
 
     const normalizedStart = new Date(starttime)
     if (Number.isNaN(normalizedStart.getTime())) {
-        throw new Error('Invalid event start time')
+        return null
     }
 
     let endtime = new Date(normalizedStart)

@@ -312,16 +312,36 @@ async function dashboardData(callback) {
 
     // console.log(await collection.distinct('country_name'))
 
+    const defaultStats = {
+        events: 0,
+        eventsEs: 0,
+        eventsEn: 0,
+        participants: 0,
+        pending: 0,
+        accepted: 0,
+        rejected: 0,
+        confirmed: 0,
+        unsubscribed: 0,
+        raspberry: 0,
+        heroku: 0,
+        serverUnknown: 0,
+    }
+
     let data = {}
 
     const collection = db.collection('events')
 
-    data.events = await collection.countDocuments({})
+    try {
+        data.events = await collection.countDocuments({})
+    } catch (error) {
+        console.error(error)
+        return callback(defaultStats)
+    }
 
     languages(collection, (error, result) => {
         if(error) {
             console.error(error)
-            return callback(undefined)
+            return callback(defaultStats)
         }
 
         result.forEach(r => data[r._id] = r.count )
@@ -329,7 +349,7 @@ async function dashboardData(callback) {
         participantsStatus(collection, (error, result) => {
             if(error) {
                 console.error(error)
-                return callback(undefined)
+                return callback(defaultStats)
             }
 
             result.forEach(r => data[r._id] = r.count )
@@ -337,7 +357,7 @@ async function dashboardData(callback) {
             serverUsage(collection, (error, result) => {
                 if(error) {
                     console.error(error)
-                    return callback(undefined)
+                    return callback(defaultStats)
                 }
 
                 result.forEach(r => data[r._id] = r.count )
@@ -345,7 +365,7 @@ async function dashboardData(callback) {
                 totalParticipants(collection, (error, result) => {
                     if(error) {
                         console.error(error)
-                        return callback(undefined)
+                        return callback(defaultStats)
                     }
 
                     result.forEach(r => data[r._id] = r.count )
