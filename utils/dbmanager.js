@@ -211,7 +211,7 @@ function findAll(callback) {
     const collection = db.collection('events');
     collection.find({}).toArray()
     .then((result) => callback(undefined, result))
-    .catch((error) => callback(error))
+    .catch((error) => callback(error, undefined))
 }
 
 function logViewStatus(eventid, ip, result) {
@@ -259,8 +259,8 @@ function languages(collection, callback) {
         { $group: { _id: '$language', count: { $sum: 1 } } },
         { $sort: { count: -1 } }
     ]).toArray()
-    .then((result) => callback(result))
-    .catch((error) => callback(error))
+    .then((result) => callback(undefined, result))
+    .catch((error) => callback(error, undefined))
 }
 
 function totalParticipants(collection, callback) {
@@ -270,8 +270,8 @@ function totalParticipants(collection, callback) {
         { $group: { _id: 'participants', count: { $sum: { $size: '$participants' } } } },
         { $sort: { count: -1 } }
     ]).toArray()
-    .then((result) => callback(result))
-    .catch((error) => callback(error))
+    .then((result) => callback(undefined, result))
+    .catch((error) => callback(error, undefined))
 }
 
 function participantsStatus(collection, callback) {
@@ -281,8 +281,8 @@ function participantsStatus(collection, callback) {
         { $group: { _id: '$participants.status', count: { $sum: 1 }} },
         { $sort: { count: -1} }
     ]).toArray()
-    .then((result) => callback(result))
-    .catch((error) => callback(error))
+    .then((result) => callback(undefined, result))
+    .catch((error) => callback(error, undefined))
 }
 
 function serverUsage(collection, callback) {
@@ -292,8 +292,8 @@ function serverUsage(collection, callback) {
         { $group: { _id: '$logs.server', count: { $sum: 1 } } },
         { $sort: { count: -1 } }
     ]).toArray()
-    .then((result) => callback(result))
-    .catch((error) => callback(error))
+    .then((result) => callback(undefined, result))
+    .catch((error) => callback(error, undefined))
 }
 
 async function dashboardData(callback) {
@@ -318,16 +318,36 @@ async function dashboardData(callback) {
 
     data.events = await collection.countDocuments({})
 
-    languages(collection, result => {
+    languages(collection, (error, result) => {
+        if(error) {
+            console.error(error)
+            return callback(undefined)
+        }
+
         result.forEach(r => data[r._id] = r.count )
 
-        participantsStatus(collection, result => {
+        participantsStatus(collection, (error, result) => {
+            if(error) {
+                console.error(error)
+                return callback(undefined)
+            }
+
             result.forEach(r => data[r._id] = r.count )
         
-            serverUsage(collection, result => {
+            serverUsage(collection, (error, result) => {
+                if(error) {
+                    console.error(error)
+                    return callback(undefined)
+                }
+
                 result.forEach(r => data[r._id] = r.count )
 
-                totalParticipants(collection, result => {
+                totalParticipants(collection, (error, result) => {
+                    if(error) {
+                        console.error(error)
+                        return callback(undefined)
+                    }
+
                     result.forEach(r => data[r._id] = r.count )
 
                     callback({

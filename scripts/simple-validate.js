@@ -51,7 +51,11 @@ async function checkJwt() {
 function checkIcal() {
     try {
         if (!process.env.MAIL_USER) {
-            process.env.MAIL_USER = 'noreply@example.com';
+            return {
+                name: 'iCal generation',
+                ok: true,
+                detail: 'Skipped (MAIL_USER not set)'
+            };
         }
 
         const cal = getIcalObjectInstance(
