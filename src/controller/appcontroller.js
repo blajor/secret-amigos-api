@@ -71,7 +71,7 @@ function sendParticipantMail(event, participant) {
             mailOptions.attachments.push(calendarObj)
             }
         } catch (error) {
-            console.error(`Unable to generate calendar attachment (eventId=${event.id}, participantId=${participant.id}):`, error.message)
+            console.error(`Unable to generate calendar attachment (eventId=${event.id}, participantId=${participant.id}):`, error)
         }
     }
 

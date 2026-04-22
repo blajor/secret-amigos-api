@@ -329,6 +329,11 @@ async function dashboardData(callback) {
 
     let data = {}
 
+    if(!db) {
+        console.error('Dashboard data requested before DB connection was initialized')
+        return callback(defaultStats)
+    }
+
     const collection = db.collection('events')
 
     try {

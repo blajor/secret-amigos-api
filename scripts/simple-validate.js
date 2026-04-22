@@ -64,6 +64,15 @@ function checkIcal() {
             'Simple validation event',
             'Validation Location'
         );
+
+        if (!cal) {
+            return {
+                name: 'iCal generation',
+                ok: false,
+                detail: 'Calendar generator returned null for the provided event datetime'
+            };
+        }
+
         const content = cal.toString();
 
         if (!content.includes('BEGIN:VCALENDAR') || !content.includes('END:VCALENDAR')) {
