@@ -9,10 +9,8 @@ const {
 let db;
 
 function setDBConnection() {
-    MongoClient.connect(process.env.DB_URI, { 
-    useNewUrlParser:true,
-    useUnifiedTopology: true,
-    poolSize: 10
+    MongoClient.connect(process.env.DB_URI, {
+        maxPoolSize: 10
     }).then(client => {
         db = client.db(process.env.DB_NAME);
         console.log(`DB connection up and running: '${process.env.DB_NAME}'`)
@@ -211,9 +209,9 @@ function deleteEventSoft(id, callback) {
 
 function findAll(callback) {
     const collection = db.collection('events');
-    collection.find({}).toArray((err, result) => {
-        callback(err, result)
-    })
+    collection.find({}).toArray()
+    .then((result) => callback(undefined, result))
+    .catch((error) => callback(error))
 }
 
 function logViewStatus(eventid, ip, result) {
@@ -224,11 +222,11 @@ function existIP(ip, callback) {
 
     const collection = db.collection('ipdata')
 
-    collection.findOne({"ip": ip}, (error, data) => {
-        if(error) console.error(error)
-
-        else if (data) callback(true)
-        else callback(false)
+    collection.findOne({"ip": ip})
+    .then((data) => callback(Boolean(data)))
+    .catch((error) => {
+        console.error(error)
+        callback(false)
     })
     /*
     collection.find({"ip":ip}).toArray((err, result) => {
@@ -260,9 +258,9 @@ function languages(collection, callback) {
         { $match: {} },
         { $group: { _id: '$language', count: { $sum: 1 } } },
         { $sort: { count: -1 } }
-    ]).toArray((err, result) => {
-        callback(err ?? result)
-    })
+    ]).toArray()
+    .then((result) => callback(result))
+    .catch((error) => callback(error))
 }
 
 function totalParticipants(collection, callback) {
@@ -271,9 +269,9 @@ function totalParticipants(collection, callback) {
         { $match: {} },
         { $group: { _id: 'participants', count: { $sum: { $size: '$participants' } } } },
         { $sort: { count: -1 } }
-    ]).toArray((err, result) => {
-        callback( err ?? result )
-    })
+    ]).toArray()
+    .then((result) => callback(result))
+    .catch((error) => callback(error))
 }
 
 function participantsStatus(collection, callback) {
@@ -282,9 +280,9 @@ function participantsStatus(collection, callback) {
         { $unwind: '$participants' },
         { $group: { _id: '$participants.status', count: { $sum: 1 }} },
         { $sort: { count: -1} }
-    ]).toArray((err, result) => {
-        callback( err ?? result )
-    })
+    ]).toArray()
+    .then((result) => callback(result))
+    .catch((error) => callback(error))
 }
 
 function serverUsage(collection, callback) {
@@ -293,9 +291,9 @@ function serverUsage(collection, callback) {
         { $unwind: '$logs'},
         { $group: { _id: '$logs.server', count: { $sum: 1 } } },
         { $sort: { count: -1 } }
-    ]).toArray((err, result) => {
-        callback(err ?? result)
-    })
+    ]).toArray()
+    .then((result) => callback(result))
+    .catch((error) => callback(error))
 }
 
 async function dashboardData(callback) {

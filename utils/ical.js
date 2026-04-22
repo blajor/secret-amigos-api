@@ -1,4 +1,4 @@
-const ical = require('ical-generator');
+const ical = require('ical-generator').default;
 
 function getIcalObjectInstance(
     starttime, 
@@ -12,8 +12,7 @@ function getIcalObjectInstance(
     // console.log(endtime.toDateString())
 
     const cal = ical({ domain: process.env.DOMAIN_NAME, name: 'Secret Amigo Event' });
-    
-    cal.domain(process.env.DOMAIN_NAME);
+
     cal.createEvent({
         start: starttime,         // eg : moment()
         end: endtime,             // eg : moment(1,'days')
