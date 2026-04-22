@@ -1,4 +1,5 @@
-const ical = require('ical-generator');
+const icalGenerator = require('ical-generator');
+const ical = icalGenerator.default || icalGenerator;
 
 function getIcalObjectInstance(
     starttime, 
@@ -7,15 +8,19 @@ function getIcalObjectInstance(
     location, 
     ) {
 
-    let endtime = new Date(starttime)
+    const normalizedStart = new Date(starttime)
+    if (Number.isNaN(normalizedStart.getTime())) {
+        return null
+    }
+
+    let endtime = new Date(normalizedStart)
     endtime.setMinutes(endtime.getMinutes() + 90)
     // console.log(endtime.toDateString())
 
     const cal = ical({ domain: process.env.DOMAIN_NAME, name: 'Secret Amigo Event' });
-    
-    cal.domain(process.env.DOMAIN_NAME);
+
     cal.createEvent({
-        start: starttime,         // eg : moment()
+        start: normalizedStart,   // normalized Date for consistent timezone handling
         end: endtime,             // eg : moment(1,'days')
         summary: summary,         // 'Summary of your event'
         description: description, // 'More description'

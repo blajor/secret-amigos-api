@@ -57,13 +57,22 @@ function sendParticipantMail(event, participant) {
         attachments: []
     }
 
-    if(event.datetime !== '') {
-        const calendarObj = {
-            filename: 'event.ics',
-            content: Buffer.from(getIcalObjectInstance(event.datetime, event.name, event.custommessage, event.location).toString()),
-            contentType: 'text/calendar'
+    if(typeof event.datetime === 'string' && event.datetime.trim() !== '') {
+        try {
+            const calendar = getIcalObjectInstance(event.datetime, event.name, event.custommessage, event.location)
+            if(!calendar) {
+                console.error(`Unable to generate calendar attachment: invalid event datetime (eventId=${event.id}, participantId=${participant.id})`)
+            } else {
+            const calendarObj = {
+                filename: 'event.ics',
+                content: Buffer.from(calendar.toString()),
+                contentType: 'text/calendar'
+            }
+            mailOptions.attachments.push(calendarObj)
+            }
+        } catch (error) {
+            console.error(`Unable to generate calendar attachment (eventId=${event.id}, participantId=${participant.id}):`, error)
         }
-        mailOptions.attachments.push(calendarObj)
     }
 
     createMailBody(event, participant, (html, text) => {
@@ -246,10 +255,10 @@ function mergeDocument(source, event, participant, language, callback) {
         break;
     }
 
-    const friend = event.participants.find(part => part.id == participant.friendid)
+    const friend = event.participants.find(part => part.id == participant.friendid) ?? { name: '', surname: '' }
     const token = generateToken(event.id, participant.id, participant.email)
 
-    file = fs.readFile(path.join(__dirname, source), (err, data) => {
+    fs.readFile(path.join(__dirname, source), (err, data) => {
         if(err) {
             console.error(err)
             return
