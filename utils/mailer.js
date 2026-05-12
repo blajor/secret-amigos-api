@@ -1,45 +1,33 @@
-const nodemailer = require('nodemailer');
-// const { google } = require('googleapis');
-// const OAuth2 = google.auth.OAuth2;
+const { Resend } = require('resend');
 
-// const oauth2Client = new OAuth2(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, 'https://developers.google.com/oauthplayground');
-
-// oauth2Client.setCredentials({
-//     refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-// });
-
-// const accessToken = oauth2Client.getAccessToken();
-
-// const smtpTransport = nodemailer.createTransport({
-//     service: 'gmail',
-//     auth: {
-//         type: 'OAuth2',
-//         user: process.env.MAIL_USER,
-//         clientId: process.env.GOOGLE_CLIENT_ID,
-//         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-//         refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-//         accessToken,
-//         // tls: {
-//         //     rejectUnauthorized: false
-//         // }
-//     }
-// });
-
-const smtpTransport = nodemailer.createTransport({
-    // pool: true,
-    host: 'mail.privateemail.com',
-    port: 465,
-    // secure: process.env.MAIL_SECURE,
-    secure: true,
-    auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS
-    },
-    tls: {
-        // rejectUnauthorized: process.env.MAIL_REJECT_UNAUTH
-        rejectUnauthorized: false
+function getResendClient() {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+        return null;
     }
-})
+
+    return new Resend(apiKey);
+}
+
+function normalizeAttachments(attachments = []) {
+    return attachments
+        .filter((attachment) => attachment && attachment.filename && attachment.content)
+        .map((attachment) => {
+            let content = attachment.content;
+
+            if (Buffer.isBuffer(content)) {
+                content = content.toString('base64');
+            } else if (content && ArrayBuffer.isView(content)) {
+                content = Buffer.from(content.buffer, content.byteOffset, content.byteLength).toString('base64');
+            }
+
+            return {
+                filename: attachment.filename,
+                content,
+                contentType: attachment.contentType
+            };
+        });
+}
 
 
 
@@ -50,26 +38,39 @@ function sendMail({
     text,
     attachments
 }, callback) {
+    const resend = getResendClient();
+    if (!resend) {
+        callback(new Error('Missing RESEND_API_KEY'));
+        return;
+    }
 
-    const mailOptions = {
-        from: `Secret Amigo <${process.env.MAIL_USER}>`,
+    const fromAddress = process.env.MAIL_FROM;
+    if (!fromAddress) {
+        callback(new Error('Missing MAIL_FROM'));
+        return;
+    }
+    const from = `${process.env.SERVER_NAME || 'Secret Amigo'} <${fromAddress}>`;
+    const resendAttachments = normalizeAttachments(attachments);
+
+    resend.emails.send({
+        from,
         to,
         subject,
-        generateTextFromHTML: true,
         html,
         text,
-        attachments
-    };
-
-    smtpTransport.sendMail(mailOptions, (error, response) => {
+        attachments: resendAttachments
+    }).then(({ data, error }) => {
         if(error) {
-            console.log(error)
+            console.log(error);
             callback(error);
-        } 
-        else callback( !(response.accepted.length === 1) );
-        
-        smtpTransport.close();
-    })
+            return;
+        }
+
+        callback(!(data && data.id));
+    }).catch((error) => {
+        console.log(error);
+        callback(error);
+    });
 }
 
 module.exports = {

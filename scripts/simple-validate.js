@@ -50,7 +50,7 @@ async function checkJwt() {
 
 function checkIcal() {
     try {
-        const requiredEnvVars = ['MAIL_USER', 'DOMAIN_NAME'];
+        const requiredEnvVars = ['DOMAIN_NAME', 'MAIL_FROM'];
         const missingEnvVars = requiredEnvVars.filter((name) => !process.env[name]);
 
         if (missingEnvVars.length > 0) {

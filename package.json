@@ -6,8 +6,9 @@
   "scripts": {
     "start": "node src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "env-cmd ./config/dev.env nodemon ./src/app.js",
-    "validate:simple": "node scripts/simple-validate.js"
+    "dev": "env-cmd -f ./config/dev.env -- nodemon ./src/app.js",
+    "validate:simple": "node scripts/simple-validate.js",
+    "validate:env": "env-cmd -f ./config/dev.env -- node scripts/simple-validate.js"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +21,7 @@
     "ipstack": "^0.1.1",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.2.0",
-    "nodemailer": "^8.0.5"
+    "resend": "^6.12.3"
   },
   "devDependencies": {
     "env-cmd": "^11.0.0",
