@@ -28,7 +28,7 @@ function getIcalObjectInstance(
         url: '',                 // 'event url'
         organizer: {              // 'organizer details'
             name: 'Secret Amigo',
-            email: process.env.MAIL_USER
+            email: process.env.MAIL_FROM
         },
     });
     return cal;
