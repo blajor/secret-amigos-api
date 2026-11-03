@@ -1,0 +1,18 @@
+Olá {{toname}},
+
+Você recebeu um convite para o evento {{eventname}}{{#if datetime}}, que acontecerá em {{datetime}}{{/if}}.
+{{#if location}}{{location}}{{/if}}
+
+Você vai presentear {{friendname}} {{friendsurname}}.
+{{#if amountTxt}}{{amountTxt}}.{{/if}}
+
+{{#if custommessage}}{{custommessage}}{{/if}}
+
+Para confirmar sua participação, acesse este link:
+{{serverurl}}/pt/confirm/{{token}}
+
+Se não quiser participar, você pode cancelar sua participação por aqui:
+{{serverurl}}/pt/unsubscribe/{{token}}
+
+Esperamos que você aproveite o evento!
+Equipe Secret Amigo
