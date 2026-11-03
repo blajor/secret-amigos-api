@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt">
+<body>
+<p>Olá {{toname}},</p>
+
+<p>Você recebeu um convite para o evento <strong>{{eventname}}</strong>{{#if datetime}}, que acontecerá em {{datetime}}{{/if}}.</p>
+
+{{#if location}}<p>{{location}}</p>{{/if}}
+
+<p>Você vai presentear <strong>{{friendname}} {{friendsurname}}</strong>.{{#if amountTxt}}<br>{{amountTxt}}.{{/if}}</p>
+
+{{#if custommessage}}<p>{{custommessage}}</p>{{/if}}
+
+<p>Para confirmar sua participação, acesse <a href="{{serverurl}}/pt/confirm/{{token}}">este link</a>.</p>
+
+<p>Esperamos que você aproveite o evento!</p>
+
+<p><img src="https://secretamigoapp.com/images/logos/SecretAmigo_App_Icon.png" height="42" width="42" style="vertical-align: middle" alt="Ícone do Secret Amigo"> Secret Amigo
+    <br><a href="https://secretamigoapp.com">secretamigoapp.com</a>
+</p>
+<a href="https://apps.apple.com/us/app/secret-amigo/id1540750726">
+    <img src="https://secretamigoapp.com/images/logos/App_Store_Black_Badge.png" height="42" width="121" style="vertical-align: middle" alt="Baixe na App Store">
+</a>
+
+<p style="color: grey; font-size:small;">Você recebeu este e-mail porque o organizador usou seu endereço para enviar o convite.
+    Se não quiser participar, você pode <a href="{{serverurl}}/pt/unsubscribe/{{token}}" style="font-style: italic;">cancelar sua participação aqui</a>.</p>
+</body>
+</html>

@@ -1,4 +1,4 @@
-const SUPPORTED_LANGUAGES = new Set(['en', 'es', 'fr']);
+const SUPPORTED_LANGUAGES = new Set(['en', 'es', 'fr', 'pt']);
 
 const MONTHS_EN = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -11,6 +11,10 @@ const MONTHS_ES = [
 const MONTHS_FR = [
   'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
   'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+];
+const MONTHS_PT = [
+  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
 ];
 
 function resolveLanguage(language) {
@@ -29,7 +33,12 @@ function formatEventDetails(event, language) {
   let amountTxt = '';
 
   if (minimum || maximum) {
-    if (resolvedLanguage === 'fr') {
+    if (resolvedLanguage === 'pt') {
+      amountTxt = 'Sugestão de valor para o presente: ';
+      if (minimum && maximum) amountTxt += 'de ' + minimum + ' a ' + maximum;
+      else if (minimum) amountTxt += 'a partir de ' + minimum;
+      else amountTxt += 'até ' + maximum;
+    } else if (resolvedLanguage === 'fr') {
       amountTxt = 'Budget cadeau : ';
       if (minimum && maximum) amountTxt += 'entre ' + minimum + ' et ' + maximum;
       else if (minimum) amountTxt += 'au moins ' + minimum;
@@ -53,7 +62,9 @@ function formatEventDetails(event, language) {
     const day = event.datetime.slice(8, 10);
     const year = event.datetime.slice(0, 4);
     if (monthIndex >= 0 && monthIndex < 12) {
-      if (resolvedLanguage === 'fr') {
+      if (resolvedLanguage === 'pt') {
+        datetime = Number(day) + ' de ' + MONTHS_PT[monthIndex] + ' de ' + year;
+      } else if (resolvedLanguage === 'fr') {
         datetime = 'le ' + Number(day) + ' ' + MONTHS_FR[monthIndex] + ' ' + year;
       } else if (resolvedLanguage === 'es') {
         datetime = 'el ' + MONTHS_ES[monthIndex] + ' ' + day + ', ' + year;
@@ -65,7 +76,8 @@ function formatEventDetails(event, language) {
 
   let location = '';
   if (event.location) {
-    if (resolvedLanguage === 'fr') location = 'Lieu : ' + event.location;
+    if (resolvedLanguage === 'pt') location = 'Local: ' + event.location;
+    else if (resolvedLanguage === 'fr') location = 'Lieu : ' + event.location;
     else if (resolvedLanguage === 'es') location = 'Ubicación: ' + event.location;
     else location = 'Location: ' + event.location;
   }

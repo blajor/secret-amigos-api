@@ -13,18 +13,20 @@ const { resultsValidation } = require('../src/validators/results');
 
 const root = path.join(__dirname, '..');
 
-test('resolves only en, es, and fr and stores the resolved event language', () => {
+test('resolves only en, es, fr, and pt and stores the resolved event language', () => {
   assert.equal(resolveLanguage('en'), 'en');
   assert.equal(resolveLanguage('es'), 'es');
   assert.equal(resolveLanguage('fr'), 'fr');
+  assert.equal(resolveLanguage('pt'), 'pt');
   assert.equal(resolveLanguage('fr-FR'), 'en');
-  assert.equal(resolveLanguage('pt'), 'en');
+  assert.equal(resolveLanguage('pt-BR'), 'en');
   assert.equal(resolveLanguage(''), 'en');
 
   const event = { language: 'fr-FR', name: 'Échange' };
   const normalized = normalizeEventLanguage(event);
   assert.equal(normalized.language, 'en');
   assert.equal(event.language, 'fr-FR');
+  assert.equal(normalizeEventLanguage({ language: 'pt' }).language, 'pt');
 });
 
 test('formats French date, gift budget, and location', () => {
@@ -43,6 +45,24 @@ test('formats French date, gift budget, and location', () => {
     'Budget cadeau : au moins 15 €');
   assert.equal(formatEventDetails({ amount: { max: '50 €' } }, 'fr').amountTxt,
     'Budget cadeau : jusqu’à 50 €');
+});
+
+test('formats Brazilian Portuguese date, gift budget, and location', () => {
+  const details = formatEventDetails({
+    datetime: '2026-12-24T18:00:00.000Z',
+    amount: { min: 'R$ 20', max: 'R$ 40' },
+    location: 'São Paulo'
+  }, 'pt');
+
+  assert.deepEqual(details, {
+    datetime: '24 de dezembro de 2026',
+    amountTxt: 'Sugestão de valor para o presente: de R$ 20 a R$ 40',
+    location: 'Local: São Paulo'
+  });
+  assert.equal(formatEventDetails({ amount: { min: 'R$ 15' } }, 'pt').amountTxt,
+    'Sugestão de valor para o presente: a partir de R$ 15');
+  assert.equal(formatEventDetails({ amount: { max: 'R$ 50' } }, 'pt').amountTxt,
+    'Sugestão de valor para o presente: até R$ 50');
 });
 
 test('keeps existing English and Spanish event formatting', () => {
@@ -113,6 +133,8 @@ test('French confirmation and unsubscribe pages render and language links exist 
   assert.ok(confirmation.includes('English'));
   assert.ok(confirmation.includes('Español'));
   assert.ok(confirmation.includes('Français'));
+  assert.ok(confirmation.includes('Português'));
+  assert.ok(confirmation.includes('pt/confirm/token-123'));
   assert.ok(confirmation.includes('en/confirm/token-123'));
   assert.ok(confirmation.includes('es/confirm/token-123'));
   assert.ok(confirmation.includes('Échange de cadeaux'));
@@ -126,20 +148,84 @@ test('French confirmation and unsubscribe pages render and language links exist 
   assert.ok(unsubscribe.includes('English'));
   assert.ok(unsubscribe.includes('Español'));
   assert.ok(unsubscribe.includes('Français'));
+  assert.ok(unsubscribe.includes('Português'));
+  assert.ok(unsubscribe.includes('pt/unsubscribe/token-123'));
   assert.ok(unsubscribe.includes('en/unsubscribe/token-123'));
   assert.ok(unsubscribe.includes('es/unsubscribe/token-123'));
   assert.ok(unsubscribe.includes('fr/confirm/token-123'));
   assert.ok(unsubscribe.includes('Échange de cadeaux'));
   assert.ok(unsubscribe.includes('Votre désinscription de l’événement'));
 
-  for (const file of ['conf_en.html', 'conf_es.html', 'unsub_en.html', 'unsub_es.html']) {
+  for (const file of ['conf_en.html', 'conf_es.html', 'conf_fr.html', 'unsub_en.html', 'unsub_es.html', 'unsub_fr.html']) {
     const source = fs.readFileSync(path.join(root, 'templates/views', file), 'utf8');
-    assert.ok(source.includes('Français'));
-    assert.ok(source.includes('/fr/'));
+    assert.ok(source.includes('Português'));
+    assert.ok(source.includes('/pt/'));
   }
 });
 
-test('English and Spanish routes remain available and French routes dispatch correctly', async (t) => {
+test('Portuguese mail templates render Brazilian event details and action links', () => {
+  const details = formatEventDetails({
+    datetime: '2026-12-24T18:00:00.000Z',
+    amount: { min: 'R$ 20', max: 'R$ 40' },
+    location: 'São Paulo'
+  }, 'pt');
+  const values = {
+    toname: 'Camila',
+    eventname: 'Amigo secreto da família',
+    datetime: details.datetime,
+    location: details.location,
+    friendname: 'Alex',
+    friendsurname: 'Silva',
+    amountTxt: details.amountTxt,
+    custommessage: 'Nos vemos em breve!',
+    serverurl: 'https://example.test',
+    token: 'token-123'
+  };
+
+  for (const file of ['mail_pt.html', 'text_pt.txt']) {
+    const source = fs.readFileSync(path.join(root, 'templates/views', file), 'utf8');
+    const rendered = Handlebars.compile(source)(values);
+    assert.ok(rendered.includes('Amigo secreto da família'));
+    assert.ok(rendered.includes('24 de dezembro de 2026'));
+    assert.ok(rendered.includes('Local: São Paulo'));
+    assert.ok(rendered.includes('de R$ 20 a R$ 40'));
+    assert.ok(rendered.includes('pt/confirm/token-123'));
+    assert.ok(rendered.includes('pt/unsubscribe/token-123'));
+  }
+});
+
+test('Portuguese confirmation and unsubscribe pages render and offer every language', () => {
+  const values = {
+    eventname: 'Amigo secreto da família',
+    datetime: '24 de dezembro de 2026',
+    location: 'Local: São Paulo',
+    friendname: 'Alex',
+    friendsurname: 'Silva',
+    amountTxt: 'Sugestão de valor para o presente: de R$ 20 a R$ 40',
+    custommessage: 'Nos vemos em breve!',
+    serverurl: 'https://example.test',
+    token: 'token-123'
+  };
+  const confirmation = Handlebars.compile(fs.readFileSync(path.join(root, 'templates/views/conf_pt.html'), 'utf8'))(values);
+  assert.ok(confirmation.includes('<html lang="pt">'));
+  assert.ok(confirmation.includes('Amigo secreto da família'));
+  assert.ok(confirmation.includes('24 de dezembro de 2026'));
+  assert.ok(confirmation.includes('Local: São Paulo'));
+  assert.ok(confirmation.includes('de R$ 20 a R$ 40'));
+  for (const language of ['en', 'es', 'fr', 'pt']) {
+    assert.ok(confirmation.includes('/' + language + '/confirm/token-123'));
+  }
+
+  const unsubscribe = Handlebars.compile(fs.readFileSync(path.join(root, 'templates/views/unsub_pt.html'), 'utf8'))(values);
+  assert.ok(unsubscribe.includes('<html lang="pt">'));
+  assert.ok(unsubscribe.includes('Sua participação no evento'));
+  assert.ok(unsubscribe.includes('pt/confirm/token-123'));
+  for (const language of ['en', 'es', 'fr', 'pt']) {
+    assert.ok(unsubscribe.includes('/' + language + '/unsubscribe/token-123'));
+  }
+});
+
+test('English, Spanish, and French routes remain available with Portuguese routes', async (t) => {
   const app = express();
   const routed = [];
   registerLanguageRoutes(app, {
@@ -164,7 +250,7 @@ test('English and Spanish routes remain available and French routes dispatch cor
   });
   const base = 'http://127.0.0.1:' + server.address().port;
 
-  for (const language of ['en', 'es', 'fr']) {
+  for (const language of ['en', 'es', 'fr', 'pt']) {
     const confirm = await fetch(base + '/' + language + '/confirm/test-token');
     assert.equal(confirm.status, 200);
     assert.match(await confirm.text(), new RegExp('<html lang="' + language + '">confirmed'));
@@ -173,8 +259,8 @@ test('English and Spanish routes remain available and French routes dispatch cor
     assert.equal(unsubscribe.status, 200);
     assert.match(await unsubscribe.text(), new RegExp('<html lang="' + language + '">unsubscribed'));
   }
-  assert.equal(routed.length, 6);
-  assert.deepEqual(routed.filter(([kind]) => kind === 'confirm').map(([, language]) => language), ['en', 'es', 'fr']);
+  assert.equal(routed.length, 8);
+  assert.deepEqual(routed.filter(([kind]) => kind === 'confirm').map(([, language]) => language), ['en', 'es', 'fr', 'pt']);
 });
 
 test('missing language remains a 400 response while supported languages validate', async (t) => {
@@ -210,7 +296,7 @@ test('missing language remains a 400 response while supported languages validate
   });
   assert.equal(missing.status, 400);
 
-  for (const language of ['en', 'es', 'fr', 'fr-FR', 'xx']) {
+  for (const language of ['en', 'es', 'fr', 'pt', 'fr-FR', 'pt-BR', 'xx']) {
     const response = await fetch(base + '/api/results', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -220,18 +306,22 @@ test('missing language remains a 400 response while supported languages validate
   }
 });
 
-test('dashboard reports French event counts and retains English and Spanish fields', () => {
-  assert.deepEqual(getEventLanguageStats({ en: 2, es: 3, fr: 4 }), {
+test('dashboard reports event counts for English, Spanish, French, and Portuguese', () => {
+  assert.deepEqual(getEventLanguageStats({ en: 2, es: 3, fr: 4, pt: 5 }), {
     eventsEs: 3,
     eventsEn: 2,
-    eventsFr: 4
+    eventsFr: 4,
+    eventsPt: 5
   });
   assert.deepEqual(getEventLanguageStats({}), {
     eventsEs: 0,
     eventsEn: 0,
-    eventsFr: 0
+    eventsFr: 0,
+    eventsPt: 0
   });
   const dashboard = fs.readFileSync(path.join(root, 'templates/views/dashboard.html'), 'utf8');
   assert.ok(dashboard.includes('French'));
   assert.ok(dashboard.includes('{{eventsFr}}'));
+  assert.ok(dashboard.includes('Portuguese (Brazil)'));
+  assert.ok(dashboard.includes('{{eventsPt}}'));
 });

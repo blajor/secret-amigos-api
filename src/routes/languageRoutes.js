@@ -1,4 +1,4 @@
-const LANGUAGES = ['en', 'es', 'fr'];
+const LANGUAGES = ['en', 'es', 'fr', 'pt'];
 
 function registerLanguageRoutes(app, { getQueryData, unsubscribeParticipant, confirmParticipant }) {
   for (const language of LANGUAGES) {

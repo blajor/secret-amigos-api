@@ -318,6 +318,7 @@ async function dashboardData(callback) {
         eventsEs: 0,
         eventsEn: 0,
         eventsFr: 0,
+        eventsPt: 0,
         participants: 0,
         pending: 0,
         accepted: 0,
