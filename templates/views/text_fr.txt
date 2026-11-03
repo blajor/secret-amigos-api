@@ -1,0 +1,18 @@
+Bonjour {{toname}},
+
+L’organisateur vous invite à l’événement {{eventname}}{{#if datetime}}, prévu {{datetime}}{{/if}}.
+{{location}}
+
+Vous offrirez un cadeau à {{friendname}} {{friendsurname}}.
+{{amountTxt}}
+
+{{custommessage}}
+
+Pour confirmer votre participation, ouvrez ce lien :
+{{serverurl}}/fr/confirm/{{token}}
+
+Si vous ne souhaitez pas participer, vous pouvez vous désinscrire ici :
+{{serverurl}}/fr/unsubscribe/{{token}}
+
+À bientôt,
+L’équipe Secret Amigo
