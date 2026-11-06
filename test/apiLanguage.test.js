@@ -13,15 +13,17 @@ const { resultsValidation } = require('../src/validators/results');
 
 const root = path.join(__dirname, '..');
 
-test('resolves en, es, fr, pt, and it and stores the resolved event language', () => {
+test('resolves en, es, fr, pt, it, and de and stores the resolved event language', () => {
   assert.equal(resolveLanguage('en'), 'en');
   assert.equal(resolveLanguage('es'), 'es');
   assert.equal(resolveLanguage('fr'), 'fr');
   assert.equal(resolveLanguage('pt'), 'pt');
   assert.equal(resolveLanguage('it'), 'it');
+  assert.equal(resolveLanguage('de'), 'de');
   assert.equal(resolveLanguage('fr-FR'), 'en');
   assert.equal(resolveLanguage('pt-BR'), 'en');
   assert.equal(resolveLanguage('it-IT'), 'en');
+  assert.equal(resolveLanguage('de-DE'), 'en');
   assert.equal(resolveLanguage(''), 'en');
 
   const event = { language: 'fr-FR', name: 'Échange' };
@@ -30,6 +32,7 @@ test('resolves en, es, fr, pt, and it and stores the resolved event language', (
   assert.equal(event.language, 'fr-FR');
   assert.equal(normalizeEventLanguage({ language: 'pt' }).language, 'pt');
   assert.equal(normalizeEventLanguage({ language: 'it' }).language, 'it');
+  assert.equal(normalizeEventLanguage({ language: 'de' }).language, 'de');
 });
 
 test('formats French date, gift budget, and location', () => {
@@ -228,7 +231,7 @@ test('Portuguese confirmation and unsubscribe pages render and offer every langu
   }
 });
 
-test('existing language routes remain available alongside Italian', async (t) => {
+test('existing language routes remain available alongside German', async (t) => {
   const app = express();
   const routed = [];
   registerLanguageRoutes(app, {
@@ -253,7 +256,7 @@ test('existing language routes remain available alongside Italian', async (t) =>
   });
   const base = 'http://127.0.0.1:' + server.address().port;
 
-  for (const language of ['en', 'es', 'fr', 'pt', 'it']) {
+  for (const language of ['en', 'es', 'fr', 'pt', 'it', 'de']) {
     const confirm = await fetch(base + '/' + language + '/confirm/test-token');
     assert.equal(confirm.status, 200);
     assert.match(await confirm.text(), new RegExp('<html lang="' + language + '">confirmed'));
@@ -262,8 +265,8 @@ test('existing language routes remain available alongside Italian', async (t) =>
     assert.equal(unsubscribe.status, 200);
     assert.match(await unsubscribe.text(), new RegExp('<html lang="' + language + '">unsubscribed'));
   }
-  assert.equal(routed.length, 10);
-  assert.deepEqual(routed.filter(([kind]) => kind === 'confirm').map(([, language]) => language), ['en', 'es', 'fr', 'pt', 'it']);
+  assert.equal(routed.length, 12);
+  assert.deepEqual(routed.filter(([kind]) => kind === 'confirm').map(([, language]) => language), ['en', 'es', 'fr', 'pt', 'it', 'de']);
 });
 
 test('missing language remains a 400 response while supported languages validate', async (t) => {
@@ -299,7 +302,7 @@ test('missing language remains a 400 response while supported languages validate
   });
   assert.equal(missing.status, 400);
 
-  for (const language of ['en', 'es', 'fr', 'pt', 'it', 'fr-FR', 'pt-BR', 'it-IT', 'xx']) {
+  for (const language of ['en', 'es', 'fr', 'pt', 'it', 'de', 'fr-FR', 'pt-BR', 'it-IT', 'de-DE', 'xx']) {
     const response = await fetch(base + '/api/results', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -309,20 +312,22 @@ test('missing language remains a 400 response while supported languages validate
   }
 });
 
-test('dashboard reports event counts for all five languages', () => {
-  assert.deepEqual(getEventLanguageStats({ en: 2, es: 3, fr: 4, pt: 5, it: 6 }), {
+test('dashboard reports event counts for all six languages', () => {
+  assert.deepEqual(getEventLanguageStats({ en: 2, es: 3, fr: 4, pt: 5, it: 6, de: 7 }), {
     eventsEs: 3,
     eventsEn: 2,
     eventsFr: 4,
     eventsPt: 5,
-    eventsIt: 6
+    eventsIt: 6,
+    eventsDe: 7
   });
   assert.deepEqual(getEventLanguageStats({}), {
     eventsEs: 0,
     eventsEn: 0,
     eventsFr: 0,
     eventsPt: 0,
-    eventsIt: 0
+    eventsIt: 0,
+    eventsDe: 0
   });
   const dashboard = fs.readFileSync(path.join(root, 'templates/views/dashboard.html'), 'utf8');
   assert.ok(dashboard.includes('French'));
@@ -331,4 +336,6 @@ test('dashboard reports event counts for all five languages', () => {
   assert.ok(dashboard.includes('{{eventsPt}}'));
   assert.ok(dashboard.includes('Italian'));
   assert.ok(dashboard.includes('{{eventsIt}}'));
+  assert.ok(dashboard.includes('German'));
+  assert.ok(dashboard.includes('{{eventsDe}}'));
 });

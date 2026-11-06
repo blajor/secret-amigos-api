@@ -1,4 +1,4 @@
-const SUPPORTED_LANGUAGES = new Set(['en', 'es', 'fr', 'pt', 'it']);
+const SUPPORTED_LANGUAGES = new Set(['en', 'es', 'fr', 'pt', 'it', 'de']);
 
 const MONTHS_EN = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -20,6 +20,10 @@ const MONTHS_IT = [
   'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno',
   'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'
 ];
+const MONTHS_DE = [
+  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+];
 
 function resolveLanguage(language) {
   return SUPPORTED_LANGUAGES.has(language) ? language : 'en';
@@ -37,7 +41,12 @@ function formatEventDetails(event, language) {
   let amountTxt = '';
 
   if (minimum || maximum) {
-    if (resolvedLanguage === 'it') {
+    if (resolvedLanguage === 'de') {
+      amountTxt = 'Geschenkbudget: ';
+      if (minimum && maximum) amountTxt += minimum + ' bis ' + maximum;
+      else if (minimum) amountTxt += 'ab ' + minimum;
+      else amountTxt += 'bis ' + maximum;
+    } else if (resolvedLanguage === 'it') {
       amountTxt = 'Budget indicativo per il regalo: ';
       if (minimum && maximum) amountTxt += 'da ' + minimum + ' a ' + maximum;
       else if (minimum) amountTxt += 'a partire da ' + minimum;
@@ -71,7 +80,9 @@ function formatEventDetails(event, language) {
     const day = event.datetime.slice(8, 10);
     const year = event.datetime.slice(0, 4);
     if (monthIndex >= 0 && monthIndex < 12) {
-      if (resolvedLanguage === 'it') {
+      if (resolvedLanguage === 'de') {
+        datetime = 'am ' + Number(day) + '. ' + MONTHS_DE[monthIndex] + ' ' + year;
+      } else if (resolvedLanguage === 'it') {
         datetime = 'il ' + (Number(day) === 1 ? '1°' : Number(day)) + ' ' + MONTHS_IT[monthIndex] + ' ' + year;
       } else if (resolvedLanguage === 'pt') {
         datetime = Number(day) + ' de ' + MONTHS_PT[monthIndex] + ' de ' + year;
@@ -87,7 +98,8 @@ function formatEventDetails(event, language) {
 
   let location = '';
   if (event.location) {
-    if (resolvedLanguage === 'it') location = 'Luogo: ' + event.location;
+    if (resolvedLanguage === 'de') location = 'Ort: ' + event.location;
+    else if (resolvedLanguage === 'it') location = 'Luogo: ' + event.location;
     else if (resolvedLanguage === 'pt') location = 'Local: ' + event.location;
     else if (resolvedLanguage === 'fr') location = 'Lieu : ' + event.location;
     else if (resolvedLanguage === 'es') location = 'Ubicación: ' + event.location;

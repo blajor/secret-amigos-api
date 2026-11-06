@@ -4,7 +4,8 @@ function getEventLanguageStats(languageCounts = {}) {
     eventsEn: languageCounts.en ?? 0,
     eventsFr: languageCounts.fr ?? 0,
     eventsPt: languageCounts.pt ?? 0,
-    eventsIt: languageCounts.it ?? 0
+    eventsIt: languageCounts.it ?? 0,
+    eventsDe: languageCounts.de ?? 0
   };
 }
 

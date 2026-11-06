@@ -1,0 +1,18 @@
+Hallo {{toname}},
+
+Du bist zur Wichtelrunde {{eventname}} eingeladen.{{#if datetime}} Sie findet {{datetime}} statt.{{/if}}
+{{#if location}}{{location}}{{/if}}
+
+Du beschenkst {{friendname}} {{friendsurname}}.
+{{#if amountTxt}}{{amountTxt}}.{{/if}}
+
+{{#if custommessage}}{{custommessage}}{{/if}}
+
+Bestätige deine Teilnahme über diesen Link:
+{{serverurl}}/de/confirm/{{token}}
+
+Wenn du nicht teilnehmen möchtest, kannst du hier absagen:
+{{serverurl}}/de/unsubscribe/{{token}}
+
+Viel Spaß beim Wichteln!
+Dein Secret Amigo Team
