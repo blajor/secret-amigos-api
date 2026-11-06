@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="de">
+<body>
+<p>Hallo {{toname}},</p>
+
+<p>Du bist zur Wichtelrunde <strong>{{eventname}}</strong> eingeladen.{{#if datetime}} Sie findet {{datetime}} statt.{{/if}}</p>
+
+{{#if location}}<p>{{location}}</p>{{/if}}
+
+<p>Du beschenkst <strong>{{friendname}} {{friendsurname}}</strong>.{{#if amountTxt}}<br>{{amountTxt}}.{{/if}}</p>
+
+{{#if custommessage}}<p>{{custommessage}}</p>{{/if}}
+
+<p>Bestätige deine Teilnahme über <a href="{{serverurl}}/de/confirm/{{token}}">diesen Link</a>.</p>
+
+<p>Viel Spaß beim Wichteln!</p>
+
+<p><img src="https://secretamigoapp.com/images/logos/SecretAmigo_App_Icon.png" height="42" width="42" style="vertical-align: middle" alt="Secret Amigo App-Symbol"> Secret Amigo
+    <br><a href="https://secretamigoapp.com">secretamigoapp.com</a>
+</p>
+<a href="https://apps.apple.com/us/app/secret-amigo/id1540750726">
+    <img src="https://secretamigoapp.com/images/logos/App_Store_Black_Badge.png" height="42" width="121" style="vertical-align: middle" alt="Im App Store laden">
+</a>
+
+<p style="color: grey; font-size:small;">Du erhältst diese E-Mail, weil deine Adresse für die Einladung zu dieser Wichtelrunde angegeben wurde.
+    Wenn du nicht teilnehmen möchtest, kannst du <a href="{{serverurl}}/de/unsubscribe/{{token}}" style="font-style: italic;">hier absagen</a>.</p>
+</body>
+</html>

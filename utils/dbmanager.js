@@ -1,4 +1,5 @@
 const MongoClient = require('mongodb').MongoClient;
+const { getEventLanguageStats } = require('./dashboardStats');
 const {
     setDBConn,
     eventSaved,
@@ -316,6 +317,10 @@ async function dashboardData(callback) {
         events: 0,
         eventsEs: 0,
         eventsEn: 0,
+        eventsFr: 0,
+        eventsPt: 0,
+        eventsIt: 0,
+        eventsDe: 0,
         participants: 0,
         pending: 0,
         accepted: 0,
@@ -377,8 +382,7 @@ async function dashboardData(callback) {
 
                     callback({
                         events: data.events ?? 0,
-                        eventsEs: data.es ?? 0,
-                        eventsEn: data.en ?? 0,
+                        ...getEventLanguageStats(data),
                         participants: data.participants ?? 0,
                         pending: data.pending ?? 0,
                         accepted: data.accepted ?? 0,
