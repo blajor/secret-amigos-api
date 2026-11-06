@@ -2,6 +2,7 @@ const path = require('path');
 const Handlebars = require('handlebars');
 const fs = require('fs');
 const { sendMail } = require('../../utils/mailer');
+const { formatEventDetails, normalizeEventLanguage, resolveLanguage } = require('../../utils/localization');
 const { getIcalObjectInstance } = require('../../utils/ical');
 const { generateToken } = require('../../utils/authenticator')
 const {
@@ -29,6 +30,7 @@ function eventGateway(event, ip, callback) {
     if(typeof event.participants === 'undefined' || event.participants.length < 3)
         return callback('Unable to send < 3 participants. Please review and retry.');
 
+    event = normalizeEventLanguage(event);
     saveEvent(event, ip)
 
     if(event.sendemails) {
@@ -85,6 +87,7 @@ function sendParticipantMail(event, participant) {
 };
 
 function confirmParticipant(queryObject, language, ip, callback) {
+    language = resolveLanguage(language);
     confParticipant(queryObject, ip, (err, event) => {
         if(err) return callback(err);
 
@@ -98,6 +101,7 @@ function confirmParticipant(queryObject, language, ip, callback) {
 };
 
 function unsubscribeParticipant(queryObject, language, ip, callback) {
+    language = resolveLanguage(language);
     unsubsParticipant(queryObject, ip, (err, event) => {
         if(err)
             return callback(err);
@@ -151,9 +155,9 @@ function viewParticipantStatus(eventid, ip, callback) {
 };
 
 function createMailBody(event, participant, callback) {
-
-    let htmlSource = `../../templates/views/mail_${event.language}.html`;
-    let textSource = `../../templates/views/text_${event.language}.txt`;
+    const language = resolveLanguage(event.language);
+    let htmlSource = `../../templates/views/mail_${language}.html`;
+    let textSource = `../../templates/views/text_${language}.txt`;
 
     // let amountTxt, datetime = '';
     // let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -198,8 +202,8 @@ function createMailBody(event, participant, callback) {
     //         textSource = textSource + 'esp.txt';
     // }
 
-    mergeDocument(htmlSource, event, participant, event.language, (htmlData) => {
-        mergeDocument(textSource, event, participant, event.language, (textData) => {
+    mergeDocument(htmlSource, event, participant, language, (htmlData) => {
+        mergeDocument(textSource, event, participant, language, (textData) => {
             return callback(htmlData, textData)
         })
     })
@@ -207,53 +211,8 @@ function createMailBody(event, participant, callback) {
 
 function mergeDocument(source, event, participant, language, callback) {
 
-    let amountTxt, datetime, location = '';
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
-
-    switch(language) {
-        case "es":
-            let precioTxt = 'El precio sugerido del regalo es ';
-            if(event.amount.min !== '' && event.amount.max === '') {
-                amountTxt = precioTxt + 'mínimo de ' + event.amount.min
-            } else if(event.amount.min === '' && event.amount.max !== '') {
-                amountTxt = precioTxt + 'máximo de ' + event.amount.max
-            } else if(event.amount.min !== '' && event.amount.max !== '') {
-                amountTxt = precioTxt + 'entre ' + event.amount.min + ' y ' + event.amount.max
-            }
-            if(event.datetime !== '') {
-                // TODO the following lines are the proper way to display dates
-                // var date = new Date(event.datetime)
-                // datetime = 'el ' + date.toLocaleDateString("es-MX", options)
-                // TODO the following line fixes how the date is displayed on the email body
-                datetime = 'el ' + meses[parseInt(event.datetime.substring(5,7))-1] + ' ' + event.datetime.substring(8,10) + ', ' + event.datetime.substring(0,4)
-            }
-            if(event.location !== '') {
-                location = 'Ubicación: ' + event.location
-            }
-        break;
-        case "en":
-            let priceTxt = 'The suggested gift price is ';
-            if(event.amount.min !== '' && event.amount.max === '') {
-                amountTxt = priceTxt + 'minimum ' + event.amount.min
-            } else if(event.amount.min === '' && event.amount.max !== '') {
-                amountTxt = priceTxt + 'maximum ' + event.amount.max
-            } else if(event.amount.min !== '' && event.amount.max !== '') {
-                amountTxt = priceTxt + 'between ' + event.amount.min + ' and ' + event.amount.max
-            }
-            if(event.datetime !== '') {
-                // TODO the following lines are the proper way to display dates
-                // var date = new Date(event.datetime)
-                // datetime = 'el ' + date.toLocaleDateString("en-US", options)
-                // TODO the following line fixes how the date is displayed on the email body
-                datetime = 'on ' + months[parseInt(event.datetime.substring(5,7))-1] + ' ' + event.datetime.substring(8,10) + ', ' + event.datetime.substring(0,4)
-            }
-            if(event.location !== '') {
-                location = 'Location: ' + event.location
-            }
-        break;
-    }
+    language = resolveLanguage(language);
+    const eventDetails = formatEventDetails(event, language);
 
     const friend = event.participants.find(part => part.id == participant.friendid) ?? { name: '', surname: '' }
     const token = generateToken(event.id, participant.id, participant.email)
@@ -268,7 +227,7 @@ function mergeDocument(source, event, participant, language, callback) {
 
         var data = {
             "eventname": event.name,
-            "datetime": datetime,
+            "datetime": eventDetails.datetime,
             "eventid": event.id,
             "toid": participant.id,
             "toname": participant.name,
@@ -276,9 +235,9 @@ function mergeDocument(source, event, participant, language, callback) {
             "toemail": participant.email,
             "friendname": friend.name,
             "friendsurname": friend.surname,
-            "amountTxt": amountTxt,
+            "amountTxt": eventDetails.amountTxt,
             "custommessage": event.custommessage,
-            "location": location,
+            "location": eventDetails.location,
             "serverurl": process.env.SERVER_URL,
             "token": token,
         }
