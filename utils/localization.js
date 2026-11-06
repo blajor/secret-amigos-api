@@ -1,4 +1,4 @@
-const SUPPORTED_LANGUAGES = new Set(['en', 'es', 'fr', 'pt']);
+const SUPPORTED_LANGUAGES = new Set(['en', 'es', 'fr', 'pt', 'it']);
 
 const MONTHS_EN = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -15,6 +15,10 @@ const MONTHS_FR = [
 const MONTHS_PT = [
   'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
   'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+];
+const MONTHS_IT = [
+  'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno',
+  'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'
 ];
 
 function resolveLanguage(language) {
@@ -33,7 +37,12 @@ function formatEventDetails(event, language) {
   let amountTxt = '';
 
   if (minimum || maximum) {
-    if (resolvedLanguage === 'pt') {
+    if (resolvedLanguage === 'it') {
+      amountTxt = 'Budget indicativo per il regalo: ';
+      if (minimum && maximum) amountTxt += 'da ' + minimum + ' a ' + maximum;
+      else if (minimum) amountTxt += 'a partire da ' + minimum;
+      else amountTxt += 'fino a ' + maximum;
+    } else if (resolvedLanguage === 'pt') {
       amountTxt = 'Sugestão de valor para o presente: ';
       if (minimum && maximum) amountTxt += 'de ' + minimum + ' a ' + maximum;
       else if (minimum) amountTxt += 'a partir de ' + minimum;
@@ -62,7 +71,9 @@ function formatEventDetails(event, language) {
     const day = event.datetime.slice(8, 10);
     const year = event.datetime.slice(0, 4);
     if (monthIndex >= 0 && monthIndex < 12) {
-      if (resolvedLanguage === 'pt') {
+      if (resolvedLanguage === 'it') {
+        datetime = 'il ' + (Number(day) === 1 ? '1°' : Number(day)) + ' ' + MONTHS_IT[monthIndex] + ' ' + year;
+      } else if (resolvedLanguage === 'pt') {
         datetime = Number(day) + ' de ' + MONTHS_PT[monthIndex] + ' de ' + year;
       } else if (resolvedLanguage === 'fr') {
         datetime = 'le ' + Number(day) + ' ' + MONTHS_FR[monthIndex] + ' ' + year;
@@ -76,7 +87,8 @@ function formatEventDetails(event, language) {
 
   let location = '';
   if (event.location) {
-    if (resolvedLanguage === 'pt') location = 'Local: ' + event.location;
+    if (resolvedLanguage === 'it') location = 'Luogo: ' + event.location;
+    else if (resolvedLanguage === 'pt') location = 'Local: ' + event.location;
     else if (resolvedLanguage === 'fr') location = 'Lieu : ' + event.location;
     else if (resolvedLanguage === 'es') location = 'Ubicación: ' + event.location;
     else location = 'Location: ' + event.location;

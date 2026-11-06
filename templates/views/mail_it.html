@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="it">
+<body>
+<p>Ciao {{toname}},</p>
+
+<p>Hai ricevuto un invito all’evento <strong>{{eventname}}</strong>{{#if datetime}}, che si terrà {{datetime}}{{/if}}.</p>
+
+{{#if location}}<p>{{location}}</p>{{/if}}
+
+<p>Farai un regalo a <strong>{{friendname}} {{friendsurname}}</strong>.{{#if amountTxt}}<br>{{amountTxt}}.{{/if}}</p>
+
+{{#if custommessage}}<p>{{custommessage}}</p>{{/if}}
+
+<p>Per confermare la tua partecipazione, <a href="{{serverurl}}/it/confirm/{{token}}">apri questo link</a>.</p>
+
+<p>Buon divertimento!</p>
+
+<p><img src="https://secretamigoapp.com/images/logos/SecretAmigo_App_Icon.png" height="42" width="42" style="vertical-align: middle" alt="Icona di Secret Amigo"> Secret Amigo
+    <br><a href="https://secretamigoapp.com">secretamigoapp.com</a>
+</p>
+<a href="https://apps.apple.com/us/app/secret-amigo/id1540750726">
+    <img src="https://secretamigoapp.com/images/logos/App_Store_Black_Badge.png" height="42" width="121" style="vertical-align: middle" alt="Scarica dall’App Store">
+</a>
+
+<p style="color: grey; font-size:small;">Ricevi questa email perché chi organizza l’evento ha usato il tuo indirizzo per invitarti.
+    Se non vuoi partecipare, puoi <a href="{{serverurl}}/it/unsubscribe/{{token}}" style="font-style: italic;">annullare la tua partecipazione qui</a>.</p>
+</body>
+</html>

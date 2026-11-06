@@ -3,7 +3,8 @@ function getEventLanguageStats(languageCounts = {}) {
     eventsEs: languageCounts.es ?? 0,
     eventsEn: languageCounts.en ?? 0,
     eventsFr: languageCounts.fr ?? 0,
-    eventsPt: languageCounts.pt ?? 0
+    eventsPt: languageCounts.pt ?? 0,
+    eventsIt: languageCounts.it ?? 0
   };
 }
 
